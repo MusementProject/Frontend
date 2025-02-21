@@ -37,8 +37,6 @@ public class Login extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        LinearLayout linearLayout = findViewById(R.id.login_content);
-
         View loginView = findViewById(R.id.login);
         View passwordView = findViewById(R.id.password);
 
