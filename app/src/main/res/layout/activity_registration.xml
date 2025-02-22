@@ -7,4 +7,86 @@
     android:layout_height="match_parent"
     tools:context=".Registration">
 
+    <ImageView
+        android:id ="@+id/musement_icon"
+        android:layout_width="100dp"
+        android:layout_height="75dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="icon"
+        android:layout_marginTop="55dp"
+        android:layout_marginBottom="50dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <LinearLayout
+        android:id = "@+id/registration_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/musement_icon">
+
+
+        <include
+            android:id="@+id/login"
+            layout="@layout/custom_edit_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <include
+            android:id="@+id/username"
+            layout="@layout/custom_edit_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login"
+            />
+
+        <include
+            android:id="@+id/email"
+            layout="@layout/custom_edit_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/username"
+            />
+
+        <include
+            android:id="@+id/password"
+            layout="@layout/custom_edit_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/email"
+            />
+
+        <include
+            android:id="@+id/repeat_password"
+            layout="@layout/custom_edit_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/password"
+            />
+    </LinearLayout>
+
+    <Button
+        android:id = "@+id/Register"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/light_blue"
+        android:padding="10dp"
+        android:text="Register"
+        android:onClick="onClickRegisterButton"
+        app:layout_constraintTop_toBottomOf="@id/registration_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

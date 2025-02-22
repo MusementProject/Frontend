@@ -1,5 +1,6 @@
 package com.example.musementfrontend;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.os.Bundle;
@@ -9,9 +10,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.musementfrontend.util.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,30 +27,39 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+        Util.setIcon(this);
+        initLoginField();
+        initPasswordField();
+    }
 
-        ImageView imageView = findViewById(R.id.musement_icon);
-
-        String filename = "musement_icon.png";
-
-        try(InputStream inputStream = getApplicationContext().getAssets().open(filename)){
-            Drawable drawable = Drawable.createFromStream(inputStream, null);
-            imageView.setImageDrawable(drawable);
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-
-        View loginView = findViewById(R.id.login);
-        View passwordView = findViewById(R.id.password);
-
-        EditText loginField = loginView.findViewById(R.id.edit_text_view);
-        EditText passwordField = passwordView.findViewById(R.id.edit_text_view);
-
+    public void initLoginField(){
+        EditText loginField = Util.getCustomEditViewById(this, R.id.login);
         loginField.setHint("Enter your login");
+    }
 
+    public void initPasswordField(){
+        EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
         passwordField.setHint("Enter your password");
         passwordField.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         passwordField.setTransformationMethod(PasswordTransformationMethod.getInstance());
     }
+
+    public void onClickSignInButton(View view){
+        // future: send data to back, if successful -> sign in, if not -> show mistake
+        EditText loginField = Util.getCustomEditViewById(this, R.id.login);
+        EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
+        if (loginField.getText().length() == 0 || passwordField.getText().length() == 0){
+            Toast toast = Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG);
+            toast.show();
+            return;
+        }
+        Intent intent = new Intent(this, Feed.class);
+        startActivity(intent);
+    }
+
+    public void onClickSignUpButton(View view){
+        Intent intent = new Intent(this, Registration.class);
+        startActivity(intent);
+    }
+
 }
