@@ -15,7 +15,17 @@
         android:supportsRtl="true"
         android:theme="@style/musement"
         android:usesCleartextTraffic="true"
+        
         tools:targetApi="31">
+        <activity
+            android:name=".Profile"
+            android:exported="false" />
+        <activity
+            android:name=".Invitation"
+            android:exported="false" />
+        <activity
+            android:name=".Recommendation"
+            android:exported="false" />
         <activity
             android:name=".Feed"
             android:exported="false" />

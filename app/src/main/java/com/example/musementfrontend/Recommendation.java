@@ -12,14 +12,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.musementfrontend.util.Util;
 
-public class Feed extends AppCompatActivity {
+public class Recommendation extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(0, 0);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_feed);
+        setContentView(R.layout.activity_recommendation);
+
         ConstraintLayout mainMenu = findViewById(R.id.main_menu);
         Util.InitMainMenu(mainMenu);
     }
