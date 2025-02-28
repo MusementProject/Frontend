@@ -7,8 +7,9 @@
     <!-- ImageButton -->
     <ImageButton
         android:id="@+id/concert"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="250dp"
+        app:layout_constraintWidth_percent="1"
         android:contentDescription="concert_image"
         android:background="@null"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -28,9 +29,10 @@
 
     <TextView
         android:id="@+id/artist"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
+        app:layout_constraintWidth_percent="1"
         app:layout_constraintTop_toTopOf="@id/main_info"
         app:layout_constraintLeft_toLeftOf="@+id/main_info"
         />

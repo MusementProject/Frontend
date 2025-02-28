@@ -94,7 +94,6 @@ public class Util {
             Glide.with(activity)
                     .load(concert.getImageUrl())
                     .into(concertImage);
-
             TextView artist = concertView.findViewById(R.id.artist);
             TextView location = concertView.findViewById(R.id.location);
             TextView date = concertView.findViewById(R.id.date);
@@ -115,6 +114,7 @@ public class Util {
             return;
         }
         Intent intent = new Intent(context, Notification.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 
@@ -124,6 +124,7 @@ public class Util {
             return;
         }
         Intent intent = new Intent(context, Feed.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 
@@ -133,6 +134,7 @@ public class Util {
             return;
         }
         Intent intent = new Intent(context, Feed.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 
@@ -142,6 +144,7 @@ public class Util {
             return;
         }
         Intent intent = new Intent(context, Recommendation.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 
@@ -151,6 +154,7 @@ public class Util {
             return;
         }
         Intent intent = new Intent(context, Invitation.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 
@@ -160,6 +164,7 @@ public class Util {
             return;
         }
         Intent intent = new Intent(context, Profile.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         context.startActivity(intent);
     }
 }

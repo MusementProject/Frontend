@@ -56,6 +56,8 @@ public class Login extends AppCompatActivity {
         }
         Intent intent = new Intent(this, Feed.class);
         startActivity(intent);
+
+        finish();
     }
 
     public void onClickSignUpButton(View view){

@@ -7,34 +7,86 @@
     android:layout_height="match_parent"
     tools:context=".Profile">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="profile"
-        app:layout_constraintRight_toRightOf="parent"
+    <LinearLayout
+        android:id="@+id/profile"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="80dp"
+        android:orientation="vertical"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/header">
 
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="150dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
+            android:background="@null"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name Surname"
+            android:layout_gravity="center_horizontal"/>
+
+        <TextView
+            android:id="@+id/nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="\@nickname"
+            android:layout_gravity="center_horizontal"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.1"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="300dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"
+            android:layout_gravity="center_horizontal"
+            app:layout_constraintWidth_percent="0.6">
+
+            <include
+                android:id="@+id/feed_item"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                layout="@layout/feed"
+                app:layout_constraintTop_toTopOf="@id/header"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                />
+        </ScrollView>
+
+
+
+    </LinearLayout>
 
     <include
         android:id="@+id/header"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
         layout="@layout/header"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
-
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <include
-        android:id = "@+id/main_menu"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:id="@+id/main_menu"
         layout="@layout/main_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
