@@ -21,7 +21,6 @@ public class Profile extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
 
-        ConstraintLayout mainMenu = findViewById(R.id.main_menu);
-        Util.InitMainMenu(mainMenu);
+        Util.Init(this);
     }
 }

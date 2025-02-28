@@ -4,17 +4,53 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- ImageButton -->
     <ImageButton
         android:id="@+id/concert"
-        android:layout_width="200dp"
-        android:layout_height="140dp"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
         android:contentDescription="concert_image"
         android:background="@null"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        >
+        app:layout_constraintRight_toRightOf="parent"/>
 
-    </ImageButton>
+    <View
+        android:id="@+id/main_info"
+        android:background="@color/blue"
+        android:alpha="0.5"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:layout_constraintBottom_toBottomOf="@id/concert"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+    </View>
+
+    <TextView
+        android:id="@+id/artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toTopOf="@id/main_info"
+        app:layout_constraintLeft_toLeftOf="@+id/main_info"
+        />
+
+    <TextView
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/artist"
+        app:layout_constraintLeft_toLeftOf="@+id/main_info"
+        />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/artist"
+        app:layout_constraintLeft_toRightOf="@+id/location"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

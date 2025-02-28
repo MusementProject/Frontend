@@ -22,18 +22,19 @@
 
     <LinearLayout
         android:id = "@+id/registration_content"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/musement_icon">
+        app:layout_constraintTop_toBottomOf="@id/musement_icon"
+        app:layout_constraintWidth_percent="0.7">
 
 
         <include
             android:id="@+id/login"
             layout="@layout/custom_edit_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -42,7 +43,7 @@
         <include
             android:id="@+id/username"
             layout="@layout/custom_edit_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/login"
@@ -51,7 +52,7 @@
         <include
             android:id="@+id/email"
             layout="@layout/custom_edit_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/username"
@@ -60,7 +61,7 @@
         <include
             android:id="@+id/password"
             layout="@layout/custom_edit_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/email"
@@ -69,7 +70,7 @@
         <include
             android:id="@+id/repeat_password"
             layout="@layout/custom_edit_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/password"
@@ -78,7 +79,7 @@
 
     <Button
         android:id = "@+id/Register"
-        android:layout_width="150dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/light_blue"
         android:padding="10dp"
@@ -87,6 +88,7 @@
         app:layout_constraintTop_toBottomOf="@id/registration_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintWidth_percent="0.5"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

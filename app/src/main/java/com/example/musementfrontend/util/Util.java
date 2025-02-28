@@ -6,11 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -18,6 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Feed;
 import com.example.musementfrontend.Invitation;
+import com.example.musementfrontend.Notification;
 import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.Recommendation;
@@ -51,11 +55,17 @@ public class Util {
         return view.findViewById(R.id.edit_text_view);
     }
 
-    static public void InitMainMenu(ConstraintLayout layout){
-        ImageButton feed = layout.findViewById(R.id.feed);
-        ImageButton recommendation = layout.findViewById(R.id.recommendation);
-        ImageButton invitation = layout.findViewById(R.id.invitation);
-        ImageButton profile = layout.findViewById(R.id.profile);
+    static public void Init(AppCompatActivity activity){
+        InitHeader(activity);
+        InitMainMenu(activity);
+    }
+
+    static private void InitMainMenu(AppCompatActivity activity){
+        ConstraintLayout mainMenu = activity.findViewById(R.id.main_menu);
+        ImageButton feed = mainMenu.findViewById(R.id.feed);
+        ImageButton recommendation = mainMenu.findViewById(R.id.recommendation);
+        ImageButton invitation = mainMenu.findViewById(R.id.invitation);
+        ImageButton profile = mainMenu.findViewById(R.id.profile);
 
         feed.setOnClickListener(Util::OnClickFeed);
         recommendation.setOnClickListener(Util::OnClickRecommendation);
@@ -64,17 +74,58 @@ public class Util {
 
     }
 
-    static public void FillFeedConcert(AppCompatActivity activity, LinearLayout feed, List<Concert> concerts){
+    static private void InitHeader(AppCompatActivity activity){
+        ConstraintLayout header = activity.findViewById(R.id.header);
+        ImageButton bell = header.findViewById(R.id.bell);
+        ImageButton musement_icon = header.findViewById(R.id.musement_icon);
+
+        bell.setOnClickListener(Util::OnClickBell);
+        musement_icon.setOnClickListener(Util::OnClickMusementIcon);
+    }
+
+    static public void FillFeedConcert(AppCompatActivity activity,List<Concert> concerts){
+        ScrollView scroll = activity.findViewById(R.id.scroll);
+        ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
+        LinearLayout feed = layout.findViewById(R.id.feed);
+
         for(Concert concert : concerts){
             View concertView = activity.getLayoutInflater().inflate(R.layout.concert_item, feed, false);
             ImageButton concertImage = concertView.findViewById(R.id.concert);
             Glide.with(activity)
                     .load(concert.getImageUrl())
                     .into(concertImage);
+
+            TextView artist = concertView.findViewById(R.id.artist);
+            TextView location = concertView.findViewById(R.id.location);
+            TextView date = concertView.findViewById(R.id.date);
+            artist.setText("Dima Bilan"); // change!!!
+            location.setText(concert.getLocation());
+            date.setText(concert.getDate().toString());
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
+
+            params.setMargins(0, 0,0 , 80);
+            concertView.setLayoutParams(params);
             feed.addView(concertView);
         }
     }
 
+    static public void OnClickBell(View view){
+        Context context = view.getContext();
+        if(context.getClass() == Notification.class){
+            return;
+        }
+        Intent intent = new Intent(context, Notification.class);
+        context.startActivity(intent);
+    }
+
+    static public void OnClickMusementIcon(View view){
+        Context context = view.getContext();
+        if(context.getClass() == Feed.class){
+            return;
+        }
+        Intent intent = new Intent(context, Feed.class);
+        context.startActivity(intent);
+    }
 
     static private void OnClickFeed(View view){
         Context context = view.getContext();
@@ -83,7 +134,6 @@ public class Util {
         }
         Intent intent = new Intent(context, Feed.class);
         context.startActivity(intent);
-
     }
 
     static private void OnClickRecommendation(View view){

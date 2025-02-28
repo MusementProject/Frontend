@@ -26,18 +26,19 @@ public class Feed extends AppCompatActivity {
         overridePendingTransition(0, 0);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_feed);
-        ConstraintLayout mainMenu = findViewById(R.id.main_menu);
-        Util.InitMainMenu(mainMenu);
+        Util.Init(this);
 
         ConstraintLayout feed = findViewById(R.id.feed_item);
-        LinearLayout feed_content = feed.findViewById(R.id.feed);
-        fiilConcerts(feed_content);
+
+        fiilConcerts();
     }
 
-    public void fiilConcerts(LinearLayout feed_content){
+    public void fiilConcerts(){
         // get content from data_base
         List<Concert> concerts = new ArrayList<>();
-        concerts.add(new Concert(1, "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg"));
-        Util.FillFeedConcert(this, feed_content, concerts);
+        for (int i = 0; i < 20; ++i){
+            concerts.add(new Concert(1,1,  "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2"));
+        }
+        Util.FillFeedConcert(this, concerts);
     }
 }
