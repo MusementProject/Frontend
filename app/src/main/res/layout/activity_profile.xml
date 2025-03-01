@@ -30,6 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Name Surname"
+            android:layout_marginTop="10dp"
             android:layout_gravity="center_horizontal"/>
 
         <TextView
@@ -37,21 +38,63 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="\@nickname"
+            android:layout_marginTop="10dp"
             android:layout_gravity="center_horizontal"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/userInfo"
+            android:layout_marginTop="30dp"
+            android:layout_width="350dp"
             android:layout_height="0dp"
             android:layout_weight="0.1"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="4"
+            app:layout_constraintWidth_percent="0.6"
+            android:layout_gravity="center_horizontal" >
 
+            <ImageButton
+                android:id="@+id/friends"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/friends"
+                android:background="@null"
+                android:onClick="OnClickFriends"/>
+
+            <ImageButton
+                android:id="@+id/tickets"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/tickets"
+                android:background="@null"
+                android:onClick="OnClickTickets"/>
+
+            <ImageButton
+                android:id="@+id/playlists"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/playlists"
+                android:background="@null"
+                android:onClick="OnClickPlaylists"/>
+
+            <ImageButton
+                android:id="@+id/social_networks"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/social_networks"
+                android:background="@null"
+                android:onClick="OnClickSocialNetworks"/>
+            
         </LinearLayout>
 
         <ScrollView
             android:id="@+id/scroll"
             android:layout_width="300dp"
             android:layout_height="0dp"
-            android:layout_weight="0.6"
+            android:layout_weight="0.5"
             android:layout_gravity="center_horizontal"
             app:layout_constraintWidth_percent="0.6">
 

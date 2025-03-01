@@ -15,7 +15,6 @@ public class Notification extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(0, 0);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_notification);
         Util.Init(this);

@@ -13,9 +13,15 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/musement"
+        android:theme="@style/Base.Theme.MusementFrontend"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".Tickets"
+            android:exported="false" />
+        <activity
+            android:name=".Playlists"
+            android:exported="false" />
         <activity
             android:name=".Notification"
             android:exported="false" />

@@ -1,6 +1,8 @@
 package com.example.musementfrontend;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -23,7 +25,6 @@ public class Profile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(0, 0);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
 
@@ -49,5 +50,25 @@ public class Profile extends AppCompatActivity {
             concerts.add(new Concert(1,1,  "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2"));
         }
         Util.FillFeedConcert(this, concerts);
+    }
+
+    public void OnClickFriends(View view){
+        // new fragment with friends
+    }
+
+    public void OnClickTickets(View view){
+        Intent intent = new Intent(this, Tickets.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
+
+    public void OnClickPlaylists(View view){
+        Intent intent = new Intent(this, Playlists.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
+
+    public void OnClickSocialNetworks(View view){
+
     }
 }
