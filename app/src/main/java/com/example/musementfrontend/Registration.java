@@ -14,7 +14,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.musementfrontend.Client.APIClient;
+import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dto.UserDTO;
+import com.example.musementfrontend.dto.UserRegisterDTO;
 import com.example.musementfrontend.util.Util;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Registration extends AppCompatActivity {
 
@@ -31,56 +39,78 @@ public class Registration extends AppCompatActivity {
         initRepeatPasswordField();
     }
 
-    public void initLoginField(){
+    public void initLoginField() {
         EditText loginField = Util.getCustomEditViewById(this, R.id.login);
         loginField.setHint("Login");
     }
 
-    public void initUsernameField(){
+    public void initUsernameField() {
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         usernameField.setHint("Username");
     }
 
-    public void initEmailField(){
+    public void initEmailField() {
         EditText emailField = Util.getCustomEditViewById(this, R.id.email);
         emailField.setHint("Email");
     }
 
-    public void initPasswordField(){
+    public void initPasswordField() {
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
         passwordField.setHint("Password");
         passwordField.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         passwordField.setTransformationMethod(PasswordTransformationMethod.getInstance());
     }
 
-    public void initRepeatPasswordField(){
+    public void initRepeatPasswordField() {
         EditText repeatPasswordField = Util.getCustomEditViewById(this, R.id.repeat_password);
         repeatPasswordField.setHint("Repeat password");
         repeatPasswordField.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         repeatPasswordField.setTransformationMethod(PasswordTransformationMethod.getInstance());
     }
 
-    public void onClickRegisterButton(View view){
+    public void onClickRegisterButton(View view) {
         EditText loginField = Util.getCustomEditViewById(this, R.id.login);
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText emailField = Util.getCustomEditViewById(this, R.id.email);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
         EditText repeatPasswordField = Util.getCustomEditViewById(this, R.id.password);
 
-        if(loginField.getText().length() == 0 || usernameField.getText().length() == 0 || emailField.getText().length() == 0 || passwordField.getText().length() == 0 || repeatPasswordField.getText().length() == 0){
+        if (loginField.getText().length() == 0 || usernameField.getText().length() == 0 ||
+                emailField.getText().length() == 0 || passwordField.getText().length() == 0 ||
+                repeatPasswordField.getText().length() == 0) {
             Toast toast = Toast.makeText(this, "Please, fill in all fields", Toast.LENGTH_LONG);
             toast.show();
             return;
         }
 
-        if(!passwordField.getText().equals(repeatPasswordField.getText())){
+        if (!passwordField.getText().equals(repeatPasswordField.getText())) {
             Toast toast = Toast.makeText(this, "Passwords are not equal", Toast.LENGTH_LONG);
             passwordField.setText("");
             repeatPasswordField.setText("");
             toast.show();
             return;
         }
-        Intent intent = new Intent(this, Login.class);
-        startActivity(intent);
+
+        // validate password and check email
+
+        UserRegisterDTO userRegister = new UserRegisterDTO(loginField.getText().toString(),
+                usernameField.getText().toString(), emailField.getText().toString(), passwordField.getText().toString());
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<UserDTO> call = apiService.userRegister(userRegister);
+        call.enqueue(new Callback<UserDTO>() {
+            @Override
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                if (response.isSuccessful()){
+                    Intent intent = new Intent(Registration.this, Login.class);
+                    startActivity(intent);
+                }// if not -> something else
+            }
+
+            @Override
+            public void onFailure(Call<UserDTO> call, Throwable t) {
+                Toast toast = Toast.makeText(Registration.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
     }
 }
