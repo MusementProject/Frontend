@@ -11,10 +11,10 @@ import retrofit2.http.POST;
 
 public interface APIService {
 
-    @POST("/login")
+    @POST("/api/login")
     Call<UserDTO> userLogin(@Body UserLoginDTO userLogin);
 
-    @POST("/register")
+    @POST("/api/register")
     Call<UserDTO> userRegister(@Body UserRegisterDTO userRegister);
 
 }
