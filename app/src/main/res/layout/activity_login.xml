@@ -32,7 +32,7 @@
 
 
         <include
-            android:id="@+id/login"
+            android:id="@+id/username"
             layout="@layout/custom_edit_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

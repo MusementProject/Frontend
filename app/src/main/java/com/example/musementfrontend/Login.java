@@ -34,8 +34,8 @@ public class Login extends AppCompatActivity {
     }
 
     public void initLoginField() {
-        EditText loginField = Util.getCustomEditViewById(this, R.id.login);
-        loginField.setHint("Enter your login");
+        EditText loginField = Util.getCustomEditViewById(this, R.id.username);
+        loginField.setHint("Enter your username");
     }
 
     public void initPasswordField() {
@@ -47,33 +47,38 @@ public class Login extends AppCompatActivity {
 
     public void onClickSignInButton(View view) {
         // future: send data to back, if successful -> sign in, if not -> show mistake
-        EditText loginField = Util.getCustomEditViewById(this, R.id.login);
+        EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
+        if (isValidLoginData(usernameField, passwordField)) {
+            UserLoginDTO userLogin = new UserLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
+            APIService apiService = APIClient.getClient().create(APIService.class);
+            Call<UserDTO> call = apiService.userLogin(userLogin);
+            call.enqueue(new Callback<UserDTO>() {
+                @Override
+                public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                    if (response.isSuccessful()) {
+                        Intent intent = new Intent(Login.this, Feed.class);
+                        startActivity(intent);
+                        finish();
+                    } // if not - other answers
+                }
+
+                @Override
+                public void onFailure(Call<UserDTO> call, Throwable t) {
+                    Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            });
+        }
+    }
+
+    private boolean isValidLoginData(EditText loginField, EditText passwordField) {
         if (loginField.getText().length() == 0 || passwordField.getText().length() == 0) {
             Toast toast = Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG);
             toast.show();
-            return;
+            return false;
         }
-
-        UserLoginDTO userLogin = new UserLoginDTO(loginField.getText().toString(), passwordField.getText().toString());
-        APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<UserDTO> call = apiService.userLogin(userLogin);
-        call.enqueue(new Callback<UserDTO>() {
-            @Override
-            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
-                if (response.isSuccessful()) {
-                    Intent intent = new Intent(Login.this, Feed.class);
-                    startActivity(intent);
-                    finish();
-                } // if not - other answers
-            }
-
-            @Override
-            public void onFailure(Call<UserDTO> call, Throwable t) {
-                Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                toast.show();
-            }
-        });
+        return true;
     }
 
     public void onClickSignUpButton(View view) {

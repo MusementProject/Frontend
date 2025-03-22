@@ -73,44 +73,54 @@ public class Registration extends AppCompatActivity {
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText emailField = Util.getCustomEditViewById(this, R.id.email);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
-        EditText repeatPasswordField = Util.getCustomEditViewById(this, R.id.password);
+        EditText repeatPasswordField = Util.getCustomEditViewById(this, R.id.repeat_password);
 
+
+        if (isValidRegisterData(loginField, usernameField, emailField, passwordField, repeatPasswordField)) {
+
+            UserRegisterDTO userRegister = new UserRegisterDTO(loginField.getText().toString(),
+                    usernameField.getText().toString(), emailField.getText().toString(), passwordField.getText().toString());
+            APIService apiService = APIClient.getClient().create(APIService.class);
+            Call<UserDTO> call = apiService.userRegister(userRegister);
+            call.enqueue(new Callback<UserDTO>() {
+                @Override
+                public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Intent intent = new Intent(Registration.this, Login.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(Registration.this, "Registration failed!", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<UserDTO> call, Throwable t) {
+                    Toast toast = Toast.makeText(Registration.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
+                    System.out.println(t.getMessage());
+                    toast.show();
+                }
+            });
+        }
+    }
+
+    private boolean isValidRegisterData(EditText loginField,EditText usernameField, EditText emailField, EditText passwordField, EditText repeatPasswordField ){
         if (loginField.getText().length() == 0 || usernameField.getText().length() == 0 ||
                 emailField.getText().length() == 0 || passwordField.getText().length() == 0 ||
                 repeatPasswordField.getText().length() == 0) {
             Toast toast = Toast.makeText(this, "Please, fill in all fields", Toast.LENGTH_LONG);
             toast.show();
-            return;
+            return false;
         }
 
-        if (!passwordField.getText().equals(repeatPasswordField.getText())) {
+        if (!(passwordField.getText().toString().equals(repeatPasswordField.getText().toString()))) {
             Toast toast = Toast.makeText(this, "Passwords are not equal", Toast.LENGTH_LONG);
             passwordField.setText("");
             repeatPasswordField.setText("");
             toast.show();
-            return;
+            return false;
         }
-
-        // validate password and check email
-
-        UserRegisterDTO userRegister = new UserRegisterDTO(loginField.getText().toString(),
-                usernameField.getText().toString(), emailField.getText().toString(), passwordField.getText().toString());
-        APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<UserDTO> call = apiService.userRegister(userRegister);
-        call.enqueue(new Callback<UserDTO>() {
-            @Override
-            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
-                if (response.isSuccessful()){
-                    Intent intent = new Intent(Registration.this, Login.class);
-                    startActivity(intent);
-                }// if not -> something else
-            }
-
-            @Override
-            public void onFailure(Call<UserDTO> call, Throwable t) {
-                Toast toast = Toast.makeText(Registration.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                toast.show();
-            }
-        });
+        return true;
     }
 }
