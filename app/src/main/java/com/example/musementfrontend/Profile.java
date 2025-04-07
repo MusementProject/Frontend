@@ -3,8 +3,10 @@ package com.example.musementfrontend;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +20,8 @@ import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 import com.example.musementfrontend.util.UtilFeed;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -35,6 +39,12 @@ public class Profile extends AppCompatActivity {
         setUserAvatar();
 
         fillUserConcerts();
+
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if (googleAccount != null){
+            TextView name = findViewById(R.id.name);
+            name.setText(googleAccount.getDisplayName());
+        }
     }
 
     private void setUserAvatar(){

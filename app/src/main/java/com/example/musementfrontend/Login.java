@@ -36,11 +36,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Login extends AppCompatActivity {
-    String googleClientId = BuildConfig.GOOGLE_CLIENT_ID;
-    GoogleSignInOptions googleSignInOptions;
-    GoogleSignInClient googleSignInClient;
-    SignInButton googleSignInButton;
-    ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    private String googleClientId = BuildConfig.GOOGLE_CLIENT_ID;
+    private GoogleSignInOptions googleSignInOptions;
+    private GoogleSignInClient googleSignInClient;
+    private SignInButton googleSignInButton;
+    private ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK){
                     Intent data = result.getData();
