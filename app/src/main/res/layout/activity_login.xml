@@ -86,15 +86,20 @@
             android:onClick="onClickSignUpButton"
             />
 
-        <ImageButton
-            android:id = "@+id/google_button"
-            android:layout_weight="0.5"
-            android:layout_width="0dp"
+<!--        <ImageButton-->
+<!--            android:id = "@+id/google_button"-->
+<!--            android:layout_weight="0.5"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="50dp"-->
+<!--            android:layout_marginLeft="10dp"-->
+<!--            android:background="@drawable/google_icon"-->
+<!--            android:contentDescription="google_icon"-->
+<!--            android:padding="10dp"-->
+<!--            />-->
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/google_sign_in_button"
+            android:layout_width="60dp"
             android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:background="@drawable/google_icon"
-            android:contentDescription="google_icon"
-            android:padding="10dp"
             />
 
     </LinearLayout>

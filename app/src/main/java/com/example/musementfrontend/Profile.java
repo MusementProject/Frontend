@@ -16,6 +16,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.Util;
+import com.example.musementfrontend.util.UtilButtons;
+import com.example.musementfrontend.util.UtilFeed;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class Profile extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
 
-        Util.Init(this);
+        UtilButtons.Init(this);
         setUserAvatar();
 
         fillUserConcerts();
@@ -50,7 +52,7 @@ public class Profile extends AppCompatActivity {
         for (int i = 0; i < 20; ++i){
             concerts.add(new Concert(1,1,  "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2", new Date(1000)));
         }
-        Util.FillFeedConcert(this, concerts);
+        UtilFeed.FillFeedConcert(this, concerts);
     }
 
     public void OnClickFriends(View view){

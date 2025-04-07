@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.musementfrontend.util.Util;
+import com.example.musementfrontend.util.UtilButtons;
 
 public class Notification extends AppCompatActivity {
 
@@ -17,6 +18,6 @@ public class Notification extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_notification);
-        Util.Init(this);
+        UtilButtons.Init(this);
     }
 }

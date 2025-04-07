@@ -2,13 +2,19 @@ package com.example.musementfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
@@ -16,12 +22,40 @@ import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.UserLoginDTO;
 import com.example.musementfrontend.util.Util;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.internal.GoogleSignInOptionsExtensionParcelable;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Login extends AppCompatActivity {
+    String googleClientId = BuildConfig.GOOGLE_CLIENT_ID;
+    GoogleSignInOptions googleSignInOptions;
+    GoogleSignInClient googleSignInClient;
+    SignInButton googleSignInButton;
+    ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == AppCompatActivity.RESULT_OK){
+                    Intent data = result.getData();
+                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                    try{
+                        task.getResult(ApiException.class);
+                        finish();
+                        Intent intent = new Intent(Login.this, Feed.class);
+                        startActivity(intent);
+                    }catch (ApiException e){
+                        Toast.makeText(Login.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +65,23 @@ public class Login extends AppCompatActivity {
         Util.setIcon(this);
         initLoginField();
         initPasswordField();
+        googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
+        googleSignInButton = findViewById(R.id.google_sign_in_button);
+        GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if (googleSignInAccount != null) {
+            finish();
+            Intent intent = new Intent(this, Feed.class);
+            startActivity(intent);
+        }
+        Log.d("Google sign in", googleClientId);
+        googleSignInButton.setOnClickListener(v -> {
+            Log.d("GoogleSignIn", "Google SignIn button clicked");
+            Intent intent = googleSignInClient.getSignInIntent();
+            googleSignInResult.launch(intent);
+        });
     }
 
     public void initLoginField() {
@@ -73,7 +124,7 @@ public class Login extends AppCompatActivity {
     }
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
-        if (loginField.getText().length() == 0 || passwordField.getText().length() == 0) {
+        if (loginField.getText().toString().isBlank()|| passwordField.getText().toString().isBlank()) {
             Toast toast = Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG);
             toast.show();
             return false;
@@ -85,5 +136,4 @@ public class Login extends AppCompatActivity {
         Intent intent = new Intent(this, Registration.class);
         startActivity(intent);
     }
-
 }

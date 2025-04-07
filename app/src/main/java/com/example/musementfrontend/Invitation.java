@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.musementfrontend.util.Util;
+import com.example.musementfrontend.util.UtilButtons;
 
 public class Invitation extends AppCompatActivity {
 
@@ -19,6 +20,6 @@ public class Invitation extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_invitation);
-        Util.Init(this);
+        UtilButtons.Init(this);
     }
 }

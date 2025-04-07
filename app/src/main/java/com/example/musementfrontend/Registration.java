@@ -106,9 +106,9 @@ public class Registration extends AppCompatActivity {
     }
 
     private boolean isValidRegisterData(EditText loginField,EditText usernameField, EditText emailField, EditText passwordField, EditText repeatPasswordField ){
-        if (loginField.getText().length() == 0 || usernameField.getText().length() == 0 ||
-                emailField.getText().length() == 0 || passwordField.getText().length() == 0 ||
-                repeatPasswordField.getText().length() == 0) {
+        if (loginField.getText().toString().isBlank() || usernameField.getText().toString().isBlank()||
+                emailField.getText().toString().isBlank() || passwordField.getText().toString().isBlank() ||
+                repeatPasswordField.getText().toString().isBlank()) {
             Toast toast = Toast.makeText(this, "Please, fill in all fields", Toast.LENGTH_LONG);
             toast.show();
             return false;
