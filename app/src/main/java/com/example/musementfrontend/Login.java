@@ -2,7 +2,6 @@ package com.example.musementfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -11,8 +10,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,13 +17,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.UserDTO;
-import com.example.musementfrontend.dto.UserLoginDTO;
+import com.example.musementfrontend.dto.UserRequestLoginDTO;
+import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.util.Util;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.internal.GoogleSignInOptionsExtensionParcelable;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
@@ -42,15 +39,19 @@ public class Login extends AppCompatActivity {
     private SignInButton googleSignInButton;
     private ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == AppCompatActivity.RESULT_OK){
+                if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
                     Intent data = result.getData();
                     Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-                    try{
+                    try {
                         task.getResult(ApiException.class);
                         finish();
+                        GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
+                        if (googleSignInAccount != null) {
+
+                        }
                         Intent intent = new Intent(Login.this, Feed.class);
                         startActivity(intent);
-                    }catch (ApiException e){
+                    } catch (ApiException e) {
                         Toast.makeText(Login.this, "Something went wrong", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -101,12 +102,12 @@ public class Login extends AppCompatActivity {
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
         if (isValidLoginData(usernameField, passwordField)) {
-            UserLoginDTO userLogin = new UserLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
+            UserRequestLoginDTO userLogin = new UserRequestLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
             APIService apiService = APIClient.getClient().create(APIService.class);
-            Call<UserDTO> call = apiService.userLogin(userLogin);
-            call.enqueue(new Callback<UserDTO>() {
+            Call<UserResponseLoginDTO> call = apiService.userLogin(userLogin);
+            call.enqueue(new Callback<UserResponseLoginDTO>() {
                 @Override
-                public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
                     if (response.isSuccessful()) {
                         Intent intent = new Intent(Login.this, Feed.class);
                         startActivity(intent);
@@ -115,7 +116,7 @@ public class Login extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<UserDTO> call, Throwable t) {
+                public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
                     Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
                     toast.show();
                 }
@@ -124,7 +125,7 @@ public class Login extends AppCompatActivity {
     }
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
-        if (loginField.getText().toString().isBlank()|| passwordField.getText().toString().isBlank()) {
+        if (loginField.getText().toString().isBlank() || passwordField.getText().toString().isBlank()) {
             Toast toast = Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG);
             toast.show();
             return false;

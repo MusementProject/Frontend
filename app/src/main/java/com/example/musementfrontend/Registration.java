@@ -10,14 +10,12 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.UserDTO;
-import com.example.musementfrontend.dto.UserRegisterDTO;
+import com.example.musementfrontend.dto.UserRequestRegisterDTO;
+import com.example.musementfrontend.dto.UserResponseRegisterDTO;
 import com.example.musementfrontend.util.Util;
 
 import retrofit2.Call;
@@ -78,13 +76,13 @@ public class Registration extends AppCompatActivity {
 
         if (isValidRegisterData(loginField, usernameField, emailField, passwordField, repeatPasswordField)) {
 
-            UserRegisterDTO userRegister = new UserRegisterDTO(loginField.getText().toString(),
+            UserRequestRegisterDTO userRegister = new UserRequestRegisterDTO(loginField.getText().toString(),
                     usernameField.getText().toString(), emailField.getText().toString(), passwordField.getText().toString());
             APIService apiService = APIClient.getClient().create(APIService.class);
-            Call<UserDTO> call = apiService.userRegister(userRegister);
-            call.enqueue(new Callback<UserDTO>() {
+            Call<UserResponseRegisterDTO> call = apiService.userRegister(userRegister);
+            call.enqueue(new Callback<UserResponseRegisterDTO>() {
                 @Override
-                public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
+                public void onResponse(Call<UserResponseRegisterDTO> call, Response<UserResponseRegisterDTO> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         Intent intent = new Intent(Registration.this, Login.class);
                         startActivity(intent);
@@ -96,7 +94,7 @@ public class Registration extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<UserDTO> call, Throwable t) {
+                public void onFailure(Call<UserResponseRegisterDTO> call, Throwable t) {
                     Toast toast = Toast.makeText(Registration.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
                     System.out.println(t.getMessage());
                     toast.show();
@@ -105,8 +103,8 @@ public class Registration extends AppCompatActivity {
         }
     }
 
-    private boolean isValidRegisterData(EditText loginField,EditText usernameField, EditText emailField, EditText passwordField, EditText repeatPasswordField ){
-        if (loginField.getText().toString().isBlank() || usernameField.getText().toString().isBlank()||
+    private boolean isValidRegisterData(EditText loginField, EditText usernameField, EditText emailField, EditText passwordField, EditText repeatPasswordField) {
+        if (loginField.getText().toString().isBlank() || usernameField.getText().toString().isBlank() ||
                 emailField.getText().toString().isBlank() || passwordField.getText().toString().isBlank() ||
                 repeatPasswordField.getText().toString().isBlank()) {
             Toast toast = Toast.makeText(this, "Please, fill in all fields", Toast.LENGTH_LONG);

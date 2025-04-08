@@ -1,20 +1,21 @@
 package com.example.musementfrontend.Client;
 
 import com.example.musementfrontend.dto.UserDTO;
-import com.example.musementfrontend.dto.UserLoginDTO;
-import com.example.musementfrontend.dto.UserRegisterDTO;
+import com.example.musementfrontend.dto.UserRequestLoginDTO;
+import com.example.musementfrontend.dto.UserRequestRegisterDTO;
+import com.example.musementfrontend.dto.UserResponseLoginDTO;
+import com.example.musementfrontend.dto.UserResponseRegisterDTO;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public interface APIService {
 
     @POST("/api/login")
-    Call<UserDTO> userLogin(@Body UserLoginDTO userLogin);
+    Call<UserResponseLoginDTO> userLogin(@Body UserRequestLoginDTO userLogin);
 
     @POST("/api/register")
-    Call<UserDTO> userRegister(@Body UserRegisterDTO userRegister);
+    Call<UserResponseRegisterDTO> userRegister(@Body UserRequestRegisterDTO userRegister);
 
 }
