@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- ImageButton -->
+    <ImageButton
+        android:id="@+id/concert"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
+        app:layout_constraintWidth_percent="1"
+        android:contentDescription="concert_image"
+        android:background="@null"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <View
+        android:id="@+id/main_info"
+        android:background="@color/blue"
+        android:alpha="0.5"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:layout_constraintBottom_toBottomOf="@id/concert"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+    </View>
+
+    <TextView
+        android:id="@+id/artist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintWidth_percent="1"
+        app:layout_constraintTop_toTopOf="@id/main_info"
+        app:layout_constraintLeft_toLeftOf="@+id/main_info"
+        />
+
+    <TextView
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/artist"
+        app:layout_constraintLeft_toLeftOf="@+id/main_info"
+        />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/artist"
+        app:layout_constraintLeft_toRightOf="@+id/location"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
