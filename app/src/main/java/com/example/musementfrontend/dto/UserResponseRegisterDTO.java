@@ -2,12 +2,15 @@ package com.example.musementfrontend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class UserLoginDTO {
+@NoArgsConstructor
+public class UserResponseRegisterDTO {
+    private Long id;
     private String username;
-    private String password;
+    private String email;
 }
