@@ -1,13 +1,14 @@
 package com.example.musementfrontend;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.musementfrontend.pojo.Concert;
-import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 import com.example.musementfrontend.util.UtilFeed;
 
@@ -27,6 +28,14 @@ public class Feed extends AppCompatActivity {
         ConstraintLayout feed = findViewById(R.id.feed_item);
 
         fillConcerts();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu, menu);
+        Log.d("Profile", "menu");
+        return true;
     }
 
     public void fillConcerts(){
