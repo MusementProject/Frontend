@@ -42,7 +42,7 @@ public class Feed extends AppCompatActivity {
         // get content from data_base
         List<Concert> concerts = new ArrayList<>();
         for (int i = 0; i < 20; ++i){
-            concerts.add(new Concert(1,1,  "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2", new Date(1000)));
+            concerts.add(new Concert(1, 1,  "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2", new Date(1000)));
         }
         UtilFeed.FillFeedConcert(this, concerts);
     }
