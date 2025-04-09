@@ -51,24 +51,14 @@ public class Playlists extends AppCompatActivity {
         builder.setTitle("Add new playlist!");
 
         LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_add_playlist, null);
+
+        View dialogView = inflater.inflate(R.layout.dialog_add_playlist, null, false);
         final EditText linkEditText = dialogView.findViewById(R.id.spotify_link_input);
         final EditText titleEditText = dialogView.findViewById(R.id.playlist_title);
 
         builder.setView(dialogView);
 
-        builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String spotifyLink = linkEditText.getText().toString().trim();
-                String playlistTitle = linkEditText.getText().toString();
-                if (!spotifyLink.isEmpty() && !playlistTitle.isEmpty()) {
-                    // parse link
-                    dialog.cancel();
-                }
-            }
-        });
-
+        builder.setPositiveButton("Done", null);
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -76,7 +66,42 @@ public class Playlists extends AppCompatActivity {
             }
         });
 
-        builder.show();
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // for Done button
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String spotifyLink = linkEditText.getText().toString().trim();
+                String playlistTitle = titleEditText.getText().toString().trim();
+
+                if (spotifyLink.isEmpty() || playlistTitle.isEmpty()) {
+                    Toast.makeText(Playlists.this, "Please fill in all the fields.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (playlistTitle.length() > 40) {
+                    Toast.makeText(Playlists.this, "Playlist title must be at most 40 characters.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                final String PREFIX = "https://open.spotify.com/playlist/";
+                if (!spotifyLink.startsWith(PREFIX) || !spotifyLink.contains("?")) {
+                    Toast.makeText(Playlists.this, "Invalid link", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // good path
+                int start = PREFIX.length();
+                int end = spotifyLink.indexOf("?");
+                String playlistId = spotifyLink.substring(start, end);
+
+                // TODO parse link
+                Toast.makeText(Playlists.this, playlistId, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
     }
 
     static public void FillPlaylists(AppCompatActivity activity, List<Playlist> playlists){
