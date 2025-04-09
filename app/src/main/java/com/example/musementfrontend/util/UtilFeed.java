@@ -17,13 +17,20 @@ import com.example.musementfrontend.pojo.Concert;
 import java.util.List;
 
 public class UtilFeed {
-    static public void FillFeedConcert(AppCompatActivity activity, List<Concert> concerts){
+    static public void FillFeedConcert(AppCompatActivity activity,List<Concert> concerts){
         ScrollView scroll = activity.findViewById(R.id.scroll);
         ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
         LinearLayout feed = layout.findViewById(R.id.feed);
 
+        int layoutId;
+        if (activity instanceof Feed) {
+            layoutId = R.layout.concert_item_for_feed;
+        } else {
+            layoutId = R.layout.concert_item;
+        }
+
         for(Concert concert : concerts){
-            View concertView = activity.getLayoutInflater().inflate(R.layout.concert_item, feed, false);
+            View concertView = activity.getLayoutInflater().inflate(layoutId, feed, false);
             ImageButton concertImage = concertView.findViewById(R.id.concert);
             Glide.with(activity)
                     .load(concert.getImageUrl())

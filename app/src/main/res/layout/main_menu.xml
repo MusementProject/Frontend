@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:background="@color/blue"
         android:padding="10dp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -39,11 +40,10 @@
             android:id="@+id/invitation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
             android:layout_weight="1"
             android:background="@null"
-            android:src="@drawable/icon_invitation"
-            android:layout_marginStart="30dp"
-            />
+            android:src="@drawable/icon_invitation" />
 
         <ImageButton
             android:id="@+id/profile"
