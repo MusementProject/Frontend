@@ -31,7 +31,7 @@ public class PlaylistStatistics extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlist_statistics);
-        Util.Init(this);
+        UtilButtons.Init(this);
 
         Intent intent = getIntent();
         Playlist playlist = (Playlist) intent.getSerializableExtra("playlist");

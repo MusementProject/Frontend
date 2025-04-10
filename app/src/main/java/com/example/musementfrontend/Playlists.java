@@ -36,7 +36,7 @@ public class Playlists extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlists);
-        Util.Init(this);
+        UtilButtons.Init(this);
         FillPlaylists(this, null);
 
         Button btnAddNewPlaylist = findViewById(R.id.add_playlist_button);
