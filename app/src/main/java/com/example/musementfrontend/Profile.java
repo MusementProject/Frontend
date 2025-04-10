@@ -135,6 +135,14 @@ public class Profile extends AppCompatActivity {
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        Bundle arguments = getIntent().getExtras();
+        UserDTO user;
+        if (arguments != null){
+            user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
+        }else{
+            user = null;
+        }
+        intent.putExtra(IntentKeys.getUSER_KEY(), user);
         startActivity(intent);
     }
 
