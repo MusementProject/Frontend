@@ -44,7 +44,7 @@ public class UtilFeed {
             date.setText(concert.getDate().toString());
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
 
-            params.setMargins(0, 0,0 , 80);
+            params.setMargins(0, 40, 0 , 40);
             concertView.setLayoutParams(params);
             feed.addView(concertView);
         }
