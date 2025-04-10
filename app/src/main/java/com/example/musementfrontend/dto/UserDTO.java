@@ -16,10 +16,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDTO implements Parcelable {
     private Long id;
+    private String googleId;
     private String username;
     private String email;
     private String accessToken;
-    private String refreshToken;
     private String photoUrl;
 
     protected UserDTO(Parcel in) {
@@ -28,10 +28,10 @@ public class UserDTO implements Parcelable {
         } else {
             id = in.readLong();
         }
+        googleId = in.readString();
         username = in.readString();
         email = in.readString();
         accessToken = in.readString();
-        refreshToken = in.readString();
         photoUrl = in.readString();
     }
 
@@ -60,10 +60,10 @@ public class UserDTO implements Parcelable {
             dest.writeByte((byte) 1);
             dest.writeLong(id);
         }
+        dest.writeString(googleId);
         dest.writeString(username);
         dest.writeString(email);
         dest.writeString(accessToken);
-        dest.writeString(refreshToken);
         dest.writeString(photoUrl);
     }
 }

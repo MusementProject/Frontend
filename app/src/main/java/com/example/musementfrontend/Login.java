@@ -18,7 +18,9 @@ import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
+import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
+import com.example.musementfrontend.util.GoogleConfig;
 import com.example.musementfrontend.util.Util;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -33,11 +35,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Login extends AppCompatActivity {
-    private String googleClientId = BuildConfig.GOOGLE_CLIENT_ID;
+    private final static String googleClientId = BuildConfig.GOOGLE_CLIENT_ID;
     private GoogleSignInOptions googleSignInOptions;
     private GoogleSignInClient googleSignInClient;
     private SignInButton googleSignInButton;
-    private ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    public  ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
                     Intent data = result.getData();
@@ -47,12 +49,11 @@ public class Login extends AppCompatActivity {
                         finish();
                         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
                         if (googleSignInAccount != null) {
-
+                            sendInfo(googleSignInAccount);
                         }
-                        Intent intent = new Intent(Login.this, Feed.class);
-                        startActivity(intent);
                     } catch (ApiException e) {
-                        Toast.makeText(Login.this, "Something went wrong", Toast.LENGTH_LONG).show();
+                        Log.e("GoogleSignIn", "Google sign-in failed", e);
+                        Toast.makeText(Login.this, "Something went wrong: " + e.getStatusCode(), Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -67,19 +68,16 @@ public class Login extends AppCompatActivity {
         initLoginField();
         initPasswordField();
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(GoogleConfig.getClientId())
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
         googleSignInButton = findViewById(R.id.google_sign_in_button);
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if (googleSignInAccount != null) {
-            finish();
-            Intent intent = new Intent(this, Feed.class);
-            startActivity(intent);
+            sendInfo(googleSignInAccount);
         }
-        Log.d("Google sign in", googleClientId);
         googleSignInButton.setOnClickListener(v -> {
-            Log.d("GoogleSignIn", "Google SignIn button clicked");
             Intent intent = googleSignInClient.getSignInIntent();
             googleSignInResult.launch(intent);
         });
@@ -98,7 +96,6 @@ public class Login extends AppCompatActivity {
     }
 
     public void onClickSignInButton(View view) {
-        // future: send data to back, if successful -> sign in, if not -> show mistake
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
         if (isValidLoginData(usernameField, passwordField)) {
@@ -136,5 +133,40 @@ public class Login extends AppCompatActivity {
     public void onClickSignUpButton(View view) {
         Intent intent = new Intent(this, Registration.class);
         startActivity(intent);
+    }
+
+    private void sendInfo(GoogleSignInAccount googleAccout){
+        String accessToken = googleAccout.getIdToken();
+        if (accessToken != null){
+            APIService apiService = APIClient.getClient().create(APIService.class);
+            UserRequestLoginWithGoogle userRequest = new UserRequestLoginWithGoogle(accessToken);
+            Call<UserResponseLoginDTO> call = apiService.userLoginWithGoogle(userRequest);
+            call.enqueue(new Callback<UserResponseLoginDTO>() {
+                @Override
+                public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
+                    if (response.isSuccessful()){
+                        UserResponseLoginDTO result = response.body();
+                        Log.d("token", accessToken);
+                        if (result != null) {
+                            UserDTO user = new UserDTO();
+                            user.setId(result.getId());
+                            user.setEmail(result.getEmail());
+                            user.setUsername(result.getUsername());
+                            user.setAccessToken(accessToken);
+                            Log.d("token", accessToken);
+                            Intent intent = new Intent(Login.this, Feed.class);
+                            intent.putExtra("user", user);
+                            startActivity(intent);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
+                    Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            });
+        }
     }
 }

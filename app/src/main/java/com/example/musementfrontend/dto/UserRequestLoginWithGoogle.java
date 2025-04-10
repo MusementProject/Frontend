@@ -7,11 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseLoginDTO {
-    private Long id;
-    private String username;
-    private String email;
+@AllArgsConstructor
+public class UserRequestLoginWithGoogle {
     private String token;
 }
