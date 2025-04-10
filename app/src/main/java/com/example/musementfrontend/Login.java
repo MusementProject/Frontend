@@ -75,12 +75,9 @@ public class Login extends AppCompatActivity {
         googleSignInButton = findViewById(R.id.google_sign_in_button);
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if (googleSignInAccount != null) {
-            Intent intent = new Intent(Login.this, Feed.class);
-            startActivity(intent);
+            sendInfo(googleSignInAccount);
         }
-        Log.d("Google sign in", googleClientId);
         googleSignInButton.setOnClickListener(v -> {
-            Log.d("GoogleSignIn", "Google SignIn button clicked");
             Intent intent = googleSignInClient.getSignInIntent();
             googleSignInResult.launch(intent);
         });

@@ -16,7 +16,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.pojo.Concert;
+import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.UtilButtons;
 import com.example.musementfrontend.util.UtilFeed;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -32,6 +34,10 @@ import java.util.List;
 
 public class Profile extends AppCompatActivity {
 
+    UserDTO user;
+    Bundle arguments;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +49,18 @@ public class Profile extends AppCompatActivity {
 
         fillUserConcerts();
 
-        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if (googleAccount != null) {
-            TextView name = findViewById(R.id.name);
-            name.setText(googleAccount.getDisplayName());
+        Bundle arguments = getIntent().getExtras();
+        if (arguments != null){
+            this.arguments = arguments;
+            this.user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
+        }else{
+            this.arguments = null;
+            this.user = null;
         }
-
+        if (user != null) {
+            TextView name = findViewById(R.id.name);
+            name.setText(user.getEmail());
+        }
         ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
@@ -57,7 +69,7 @@ public class Profile extends AppCompatActivity {
             menu.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.profile_settings){
-                    //
+                    // HERE SOME PROFILE CHANGES
                     return true;
                 }
                 if (itemId == R.id.log_out){
