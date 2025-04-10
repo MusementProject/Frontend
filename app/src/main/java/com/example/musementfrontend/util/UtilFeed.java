@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.bumptech.glide.Glide;
+import com.example.musementfrontend.Feed;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.pojo.Concert;
 
