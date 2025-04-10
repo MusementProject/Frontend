@@ -1,6 +1,7 @@
 package com.example.musementfrontend;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -34,7 +36,7 @@ public class Playlists extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlists);
-        UtilButtons.Init(this);
+        Util.Init(this);
         FillPlaylists(this, null);
 
         Button btnAddNewPlaylist = findViewById(R.id.add_playlist_button);
@@ -104,7 +106,7 @@ public class Playlists extends AppCompatActivity {
         });
     }
 
-    static public void FillPlaylists(AppCompatActivity activity, List<Playlist> playlists){
+    public void FillPlaylists(AppCompatActivity activity, List<Playlist> playlists){
         ScrollView scroll = activity.findViewById(R.id.scroll);
         ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
         LinearLayout feed = layout.findViewById(R.id.feed);
@@ -130,18 +132,26 @@ public class Playlists extends AppCompatActivity {
                 Playlist p = new Playlist(0, playlistNames.get(i), null);
                 playlists.add(p);
             }
-        }
 
-        int layoutId = R.layout.playlist_item;
-        for (Playlist playlist : playlists) {
-            View playlistView = activity.getLayoutInflater().inflate(layoutId, feed, false);
-            TextView playlistName = playlistView.findViewById(R.id.playlist_name);
-            playlistName.setText(playlist.getTitle());
+            int layoutId = R.layout.playlist_item;
+            for (final Playlist playlist : playlists) {
+                View playlistView = activity.getLayoutInflater().inflate(layoutId, feed, false);
+                TextView playlistName = playlistView.findViewById(R.id.playlist_name);
+                playlistName.setText(playlist.getTitle());
 
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) playlistView.getLayoutParams();
-            params.setMargins(0, 0, 0, 60);
-            playlistView.setLayoutParams(params);
-            feed.addView(playlistView);
+                playlistView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
+                        intent.putExtra("playlist", playlist);
+                        startActivity(intent);
+                    }
+                });
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) playlistView.getLayoutParams();
+                params.setMargins(0, 0, 0, 60);
+                playlistView.setLayoutParams(params);
+                feed.addView(playlistView);
+            }
         }
     }
 }

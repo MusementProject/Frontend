@@ -1,8 +1,11 @@
 package com.example.musementfrontend.pojo;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class Artist {
+public class Artist implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int id;
     private String name;
     private String description;
