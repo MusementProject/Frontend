@@ -3,7 +3,6 @@ package com.example.musementfrontend;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,17 +17,28 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.example.musementfrontend.Client.APIClient;
+import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
+import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
+import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.pojo.Playlist;
-import com.example.musementfrontend.util.Util;
+import com.example.musementfrontend.pojo.PlaylistInfo;
+import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.UtilButtons;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Playlists extends AppCompatActivity {
 
@@ -101,10 +111,41 @@ public class Playlists extends AppCompatActivity {
                 String playlistId = spotifyLink.substring(start, end);
 
                 // TODO parse link
-                Toast.makeText(Playlists.this, playlistId, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(Playlists.this, playlistId, Toast.LENGTH_SHORT).show();
+                getNewPlaylist(playlistId, playlistTitle);
                 dialog.dismiss();
             }
         });
+    }
+
+    private void getNewPlaylist(String playlistId, String playlistTitle){
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Bundle arguments = getIntent().getExtras();
+        UserDTO user;
+        if (arguments != null){
+            user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
+        }else{
+            user = null;
+        }
+        if (user != null) {
+            SpotifyPlaylistRequest request = new SpotifyPlaylistRequest(user.getId(), playlistId, playlistTitle);
+            Call<SpotifyPlaylistResponse> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
+            call.enqueue(new Callback<SpotifyPlaylistResponse>() {
+                @Override
+                public void onResponse(Call<SpotifyPlaylistResponse> call, Response<SpotifyPlaylistResponse> response) {
+                    if (response.isSuccessful()){
+                        SpotifyPlaylistResponse data = response.body();
+                        // add data
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SpotifyPlaylistResponse> call, Throwable t) {
+                    Toast toast = Toast.makeText(Playlists.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            });
+        }
     }
 
     public void FillPlaylists(AppCompatActivity activity, List<Playlist> playlists){
@@ -140,13 +181,10 @@ public class Playlists extends AppCompatActivity {
                 TextView playlistName = playlistView.findViewById(R.id.playlist_name);
                 playlistName.setText(playlist.getTitle());
 
-                playlistView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
-                        intent.putExtra("playlist", playlist);
-                        startActivity(intent);
-                    }
+                playlistView.setOnClickListener(v -> {
+                    Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
+                    intent.putExtra("playlist", playlist);
+                    startActivity(intent);
                 });
                 ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) playlistView.getLayoutParams();
                 params.setMargins(0, 0, 0, 60);
