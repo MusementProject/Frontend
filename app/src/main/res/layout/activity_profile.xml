@@ -127,7 +127,7 @@
         android:layout_weight="1"
         android:src="@drawable/settings"
         android:background="@null"
-        android:onClick="OnClickFriends"
+        android:onClick="OnClickProfileSettings"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         app:layout_constraintRight_toRightOf="parent"
