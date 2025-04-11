@@ -14,15 +14,18 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO implements Parcelable {
+public class User implements Parcelable {
     private Long id;
     private String googleId;
     private String username;
+    private String nickname;
     private String email;
-    private String accessToken;
     private String photoUrl;
+    private String bio;
+    private String telegram;
+    private String accessToken;
 
-    protected UserDTO(Parcel in) {
+    protected User(Parcel in) {
         if (in.readByte() == 0) {
             id = null;
         } else {
@@ -30,20 +33,23 @@ public class UserDTO implements Parcelable {
         }
         googleId = in.readString();
         username = in.readString();
+        nickname = in.readString();
         email = in.readString();
-        accessToken = in.readString();
         photoUrl = in.readString();
+        bio = in.readString();
+        telegram = in.readString();
+        accessToken = in.readString();
     }
 
-    public static final Creator<UserDTO> CREATOR = new Creator<UserDTO>() {
+    public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
-        public UserDTO createFromParcel(Parcel in) {
-            return new UserDTO(in);
+        public User createFromParcel(Parcel in) {
+            return new User(in);
         }
 
         @Override
-        public UserDTO[] newArray(int size) {
-            return new UserDTO[size];
+        public User[] newArray(int size) {
+            return new User[size];
         }
     };
 
@@ -62,8 +68,11 @@ public class UserDTO implements Parcelable {
         }
         dest.writeString(googleId);
         dest.writeString(username);
+        dest.writeString(nickname);
         dest.writeString(email);
-        dest.writeString(accessToken);
         dest.writeString(photoUrl);
+        dest.writeString(bio);
+        dest.writeString(telegram);
+        dest.writeString(accessToken);
     }
 }

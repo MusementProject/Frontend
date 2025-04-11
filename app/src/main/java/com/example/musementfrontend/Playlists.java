@@ -23,9 +23,8 @@ import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
 import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
-import com.example.musementfrontend.dto.UserDTO;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Playlist;
-import com.example.musementfrontend.pojo.PlaylistInfo;
 import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.UtilButtons;
 
@@ -33,10 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -120,10 +115,12 @@ public class Playlists extends AppCompatActivity {
     private void getNewPlaylist(String playlistId, String playlistTitle) {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Bundle arguments = getIntent().getExtras();
+
         UserDTO user;
         if (arguments != null) {
             user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
         } else {
+
             user = null;
         }
         if (user != null) {
