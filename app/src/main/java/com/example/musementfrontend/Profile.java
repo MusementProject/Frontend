@@ -69,7 +69,8 @@ public class Profile extends AppCompatActivity {
             menu.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.profile_settings){
-                    // HERE SOME PROFILE CHANGES
+                    Intent intent = new Intent(Profile.this, ProfileSettings.class);
+                    startActivity(intent);
                     return true;
                 }
                 if (itemId == R.id.log_out){
@@ -142,4 +143,7 @@ public class Profile extends AppCompatActivity {
 
     }
 
+    public void OnClickProfileSettings(View view) {
+
+    }
 }
