@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Заливка фона для поля ввода (светло-фиолетовый) -->
+    <solid android:color="#786E92" />
+
+    <!-- Скруглённые углы (пример: 8dp) -->
+    <corners android:radius="8dp" />
+
+</shape>
