@@ -161,28 +161,6 @@ android:padding="16dp">
         android:textColorHint="#80FFFFFF"
         android:background="@drawable/edittext_background" />
 
-    <!-- Поле ввода Instagram -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Instagram:"
-        android:textSize="16sp"
-        android:textColor="#FFFFFF" />
-
-    <EditText
-        android:id="@+id/etInstagram"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:padding="8dp"
-        android:textSize="16sp"
-        android:hint="Instagram (@username)"
-        android:inputType="text"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#80FFFFFF"
-        android:background="@drawable/edittext_background" />
-
     <!-- Кнопка "Сохранить" -->
     <Button
         android:id="@+id/btnSave"
