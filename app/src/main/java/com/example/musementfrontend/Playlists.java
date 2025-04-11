@@ -3,7 +3,6 @@ package com.example.musementfrontend;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,24 +17,25 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
+import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.pojo.Playlist;
 import com.example.musementfrontend.pojo.PlaylistInfo;
 import com.example.musementfrontend.util.IntentKeys;
-import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -129,19 +129,18 @@ public class Playlists extends AppCompatActivity {
         }
         if (user != null) {
             SpotifyPlaylistRequest request = new SpotifyPlaylistRequest(user.getId(), playlistId, playlistTitle);
-            Call<List<PlaylistInfo>> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
-            call.enqueue(new Callback<List<PlaylistInfo>>() {
+            Call<SpotifyPlaylistResponse> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
+            call.enqueue(new Callback<SpotifyPlaylistResponse>() {
                 @Override
-                public void onResponse(Call<List<PlaylistInfo>> call, Response<List<PlaylistInfo>> response) {
+                public void onResponse(Call<SpotifyPlaylistResponse> call, Response<SpotifyPlaylistResponse> response) {
                     if (response.isSuccessful()){
-                        List<PlaylistInfo> data = response.body();
-                        System.out.println("win");
+                        SpotifyPlaylistResponse data = response.body();
                         // add data
                     }
                 }
 
                 @Override
-                public void onFailure(Call<List<PlaylistInfo>> call, Throwable t) {
+                public void onFailure(Call<SpotifyPlaylistResponse> call, Throwable t) {
                     Toast toast = Toast.makeText(Playlists.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
                     toast.show();
                 }

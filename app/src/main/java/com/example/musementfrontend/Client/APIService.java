@@ -1,6 +1,7 @@
 package com.example.musementfrontend.Client;
 
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
+import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
@@ -30,5 +31,5 @@ public interface APIService {
     Call<UserResponseLoginDTO> userLoginWithGoogle(@Body UserRequestLoginWithGoogle userLoginGoogle);
 
     @POST("/api/playlists/add")
-    Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
+    Call<SpotifyPlaylistResponse> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
 }
