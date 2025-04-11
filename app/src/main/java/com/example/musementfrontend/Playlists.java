@@ -3,6 +3,7 @@ package com.example.musementfrontend;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +60,7 @@ public class Playlists extends AppCompatActivity {
         });
     }
 
-    private void showAddPlaylistDialog(){
+    private void showAddPlaylistDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add new playlist!");
 
@@ -110,87 +111,117 @@ public class Playlists extends AppCompatActivity {
                 int end = spotifyLink.indexOf("?");
                 String playlistId = spotifyLink.substring(start, end);
 
-                // TODO parse link
-//                Toast.makeText(Playlists.this, playlistId, Toast.LENGTH_SHORT).show();
                 getNewPlaylist(playlistId, playlistTitle);
                 dialog.dismiss();
             }
         });
     }
 
-    private void getNewPlaylist(String playlistId, String playlistTitle){
+    private void getNewPlaylist(String playlistId, String playlistTitle) {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Bundle arguments = getIntent().getExtras();
         UserDTO user;
-        if (arguments != null){
+        if (arguments != null) {
             user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
-        }else{
+        } else {
             user = null;
         }
         if (user != null) {
             SpotifyPlaylistRequest request = new SpotifyPlaylistRequest(user.getId(), playlistId, playlistTitle);
-            Call<SpotifyPlaylistResponse> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
-            call.enqueue(new Callback<SpotifyPlaylistResponse>() {
+            Call<List<PlaylistInfo>> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
+            call.enqueue(new Callback<List<PlaylistInfo>>() {
                 @Override
-                public void onResponse(Call<SpotifyPlaylistResponse> call, Response<SpotifyPlaylistResponse> response) {
-                    if (response.isSuccessful()){
-                        SpotifyPlaylistResponse data = response.body();
-                        // add data
+                public void onResponse(Call<List<PlaylistInfo>> call, Response<List<PlaylistInfo>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<PlaylistInfo> playlistInfos = response.body();
+
+                        Playlist convertedPlaylist = new Playlist(playlistTitle, playlistId, playlistInfos);
+
+                        Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
+                        intent.putExtra("playlist", convertedPlaylist);
+                        startActivity(intent);
+                    } else {
+                        String errorMsg = "";
+                        try {
+                            errorMsg = response.errorBody().string();
+                        } catch (Exception e) {
+                            errorMsg = "Error reading errorBody.";
+                        }
+                        Log.e("Playlists", "Response error (" + response.code() + "): " + errorMsg);
+                        Toast.makeText(Playlists.this, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<SpotifyPlaylistResponse> call, Throwable t) {
-                    Toast toast = Toast.makeText(Playlists.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                    toast.show();
+                public void onFailure(Call<List<PlaylistInfo>> call, Throwable t) {
+                    Log.e("Playlists", "API call failed", t);
+                    Toast.makeText(Playlists.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         }
     }
 
-    public void FillPlaylists(AppCompatActivity activity, List<Playlist> playlists){
+    public void FillPlaylists(AppCompatActivity activity, List<Playlist> playlists) {
         ScrollView scroll = activity.findViewById(R.id.scroll);
         ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
         LinearLayout feed = layout.findViewById(R.id.feed);
 
-        if (playlists == null || playlists.isEmpty()) { // remove
+        // TODO remove
+//        ArrayList<String> playlistNames = new ArrayList<>(Arrays.asList(
+//                "My 2017",
+//                "Crazy Vibe",
+//                "Midnight Chill",
+//                "Rainy Window Thoughts",
+//                "Dancing in My Room",
+//                "Lost in Daydreams",
+//                "Sunny Mood Boost",
+//                "Autumn Sadness",
+//                "Alone but Okay",
+//                "Soft Chaos",
+//                "Main Character Energy"
+//        ));
+//
+//        playlists = new ArrayList<>();
+//        for (int i = 0; i < playlistNames.size(); i++) {
+//            Playlist p = new Playlist(0, playlistNames.get(i), null);
+//            playlists.add(p);
+//        }
 
-            ArrayList<String> playlistNames = new ArrayList<>(Arrays.asList(
-                    "My 2017",
-                    "Crazy Vibe",
-                    "Midnight Chill",
-                    "Rainy Window Thoughts",
-                    "Dancing in My Room",
-                    "Lost in Daydreams",
-                    "Sunny Mood Boost",
-                    "Autumn Sadness",
-                    "Alone but Okay",
-                    "Soft Chaos",
-                    "Main Character Energy"
-            ));
+        if (playlists == null || playlists.isEmpty()) {
+            TextView emptyText = new TextView(activity);
+            emptyText.setText("No playlists yet. Add the first one!");
+            emptyText.setTextSize(20);
+            emptyText.setTextColor(activity.getResources().getColor(android.R.color.darker_gray));
+            emptyText.setPadding(20, 20, 20, 20);
+            emptyText.setGravity(android.view.Gravity.CENTER);
+            emptyText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            emptyText.setTypeface(emptyText.getTypeface(), android.graphics.Typeface.ITALIC);
 
-            playlists = new ArrayList<>();
-            for (int i = 0; i < playlistNames.size(); i++) {
-                Playlist p = new Playlist(0, playlistNames.get(i), null);
-                playlists.add(p);
-            }
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(20, 20, 20, 20);
+            emptyText.setLayoutParams(params);
 
-            int layoutId = R.layout.playlist_item;
-            for (final Playlist playlist : playlists) {
-                View playlistView = activity.getLayoutInflater().inflate(layoutId, feed, false);
-                TextView playlistName = playlistView.findViewById(R.id.playlist_name);
-                playlistName.setText(playlist.getTitle());
+            feed.addView(emptyText);
+            return;
+        }
 
-                playlistView.setOnClickListener(v -> {
-                    Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
-                    intent.putExtra("playlist", playlist);
-                    startActivity(intent);
-                });
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) playlistView.getLayoutParams();
-                params.setMargins(0, 0, 0, 60);
-                playlistView.setLayoutParams(params);
-                feed.addView(playlistView);
-            }
+
+        int layoutId = R.layout.playlist_item;
+        for (final Playlist playlist : playlists) {
+            View playlistView = activity.getLayoutInflater().inflate(layoutId, feed, false);
+            TextView playlistName = playlistView.findViewById(R.id.playlist_name);
+            playlistName.setText(playlist.getTitle());
+
+            playlistView.setOnClickListener(v -> {
+                Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
+                intent.putExtra("playlist", playlist);
+                startActivity(intent);
+            });
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) playlistView.getLayoutParams();
+            params.setMargins(0, 0, 0, 60);
+            playlistView.setLayoutParams(params);
+            feed.addView(playlistView);
         }
     }
 }

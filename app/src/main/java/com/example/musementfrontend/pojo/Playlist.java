@@ -1,5 +1,7 @@
 package com.example.musementfrontend.pojo;
 
+import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +56,22 @@ public class Playlist implements Serializable {
                 new Artist(10, "Uma2rman", null, "https://show-biz.by/profile/image/profile_image/966/xxlarge/crop=auto/_v=1d5941467748005", null),
                 6);
 
+    }
+
+    public Playlist(String title, String playlistUrl, List<PlaylistInfo> playlistInfos){
+        this.id = 0; // TODO change
+        this.title = title;
+        this.playlistUrl = playlistUrl;
+        this.artistSongCounts = new HashMap<>();
+        for (PlaylistInfo info : playlistInfos) {
+            Artist artist = info.getArtist();
+            int count = info.getCounter().intValue();
+            if (artistSongCounts.containsKey(artist)) {
+                artistSongCounts.put(artist, artistSongCounts.get(artist) + count);
+            } else {
+                artistSongCounts.put(artist, count);
+            }
+        }
     }
 
     public String getTitle() {

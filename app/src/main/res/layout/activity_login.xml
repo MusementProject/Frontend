@@ -83,8 +83,7 @@
             android:backgroundTint="@color/light_blue"
             android:padding="10dp"
             android:text="Sign up"
-            android:onClick="onClickSignUpButton"
-            />
+            android:onClick="onClickSignUpButton"/>
 
 <!--        <ImageButton-->
 <!--            android:id = "@+id/google_button"-->
@@ -98,8 +97,11 @@
 <!--            />-->
         <com.google.android.gms.common.SignInButton
             android:id="@+id/google_sign_in_button"
-            android:layout_width="60dp"
+            android:layout_width="50dp"
             android:layout_height="50dp"
+            android:clipToOutline="true"
+            android:background="@drawable/rounded_corners_artists"
+            android:layout_marginLeft="10dp"
             />
 
     </LinearLayout>
