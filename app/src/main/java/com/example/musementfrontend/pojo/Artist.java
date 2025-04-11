@@ -2,7 +2,15 @@ package com.example.musementfrontend.pojo;
 
 import java.io.Serializable;
 import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Artist implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -11,32 +19,4 @@ public class Artist implements Serializable {
     private String description;
     private String imageUrl;
     private Set<Concert> concerts;
-
-    public Artist(int id, String name, String description, String imageUrl, Set<Concert> concerts) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.concerts = concerts;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public Set<Concert> getConcerts() {
-        return concerts;
-    }
 }

@@ -25,5 +25,5 @@ public interface APIService {
     Call<UserResponseLoginDTO> userLoginWithGoogle(@Body UserRequestLoginWithGoogle userLoginGoogle);
 
     @POST("/api/playlists/add")
-    Call<SpotifyPlaylistResponse> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
+    Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
 }
