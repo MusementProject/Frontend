@@ -25,6 +25,7 @@ import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
 import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Playlist;
+import com.example.musementfrontend.pojo.PlaylistInfo;
 import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.UtilButtons;
 
@@ -116,9 +117,9 @@ public class Playlists extends AppCompatActivity {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Bundle arguments = getIntent().getExtras();
 
-        UserDTO user;
+        User user;
         if (arguments != null) {
-            user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER_KEY());
         } else {
 
             user = null;

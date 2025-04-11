@@ -7,6 +7,9 @@ import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
+import com.example.musementfrontend.pojo.PlaylistInfo;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
