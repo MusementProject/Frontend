@@ -9,7 +9,7 @@
 
     tools:context=".ProfileSettings">
 
-    <!-- Header (верхняя панель) -->
+
 <include
 android:id="@+id/header"
 layout="@layout/header"
@@ -19,7 +19,7 @@ app:layout_constraintTop_toTopOf="parent"
 app:layout_constraintLeft_toLeftOf="parent"
 app:layout_constraintRight_toRightOf="parent" />
 
-    <!-- Footer (нижняя панель, например main_menu) -->
+
 <include
 android:id="@+id/main_menu"
 layout="@layout/main_menu"
@@ -29,7 +29,7 @@ app:layout_constraintBottom_toBottomOf="parent"
 app:layout_constraintLeft_toLeftOf="parent"
 app:layout_constraintRight_toRightOf="parent" />
 
-    <!-- Прокрутка основного содержимого между хедером и футером -->
+
 <ScrollView
 android:id="@+id/scrollViewProfileSettings"
 android:layout_width="0dp"
@@ -40,23 +40,20 @@ app:layout_constraintLeft_toLeftOf="parent"
 app:layout_constraintRight_toRightOf="parent"
 android:padding="16dp">
 
-<!-- Внутренний LinearLayout для размещения всех элементов -->
+
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- Аватар пользователя -->
+
     <ImageView
         android:id="@+id/ivAvatar"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_gravity="center_horizontal"
-        android:scaleType="centerCrop"
-        android:background="#9A9A9A"
         android:contentDescription="User's profile picture"/>
 
-    <!-- Кнопка для смены аватарки -->
     <Button
         android:id="@+id/btnChangeAvatar"
         android:layout_width="wrap_content"
@@ -72,7 +69,6 @@ android:padding="16dp">
         android:layout_height="16dp"
         android:layout_marginTop="8dp" />
 
-    <!-- Подпись и поле ввода Имени -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -93,7 +89,6 @@ android:padding="16dp">
         android:inputType="textPersonName"
         android:text="name" />
 
-    <!-- Подпись и поле ввода Никнейма -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -115,7 +110,6 @@ android:padding="16dp">
         android:inputType="text"
         android:text="nickname" />
 
-    <!-- Поле ввода Био -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -139,7 +133,6 @@ android:padding="16dp">
         android:minLines="3"
         android:hint="Tell us about yourself" />
 
-    <!-- Поле ввода Telegram -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -161,7 +154,7 @@ android:padding="16dp">
         android:textColorHint="#80FFFFFF"
         android:background="@drawable/edittext_background" />
 
-    <!-- Кнопка "Сохранить" -->
+
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
@@ -174,4 +167,4 @@ android:padding="16dp">
 </LinearLayout>
 </ScrollView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

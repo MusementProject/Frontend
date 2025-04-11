@@ -15,7 +15,7 @@ import com.example.musementfrontend.Notification;
 import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.Recommendation;
-import com.example.musementfrontend.dto.UserDTO;
+import com.example.musementfrontend.dto.User;
 
 public class UtilButtons {
 
@@ -32,9 +32,9 @@ public class UtilButtons {
         ImageButton profile = mainMenu.findViewById(R.id.profile);
 
         Bundle arguments = activity.getIntent().getExtras();
-        UserDTO user;
+        User user;
         if (arguments != null){
-            user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER_KEY());
         } else {
             user = null;
         }
@@ -49,18 +49,12 @@ public class UtilButtons {
         ConstraintLayout header = activity.findViewById(R.id.header);
         ImageButton bell = header.findViewById(R.id.bell);
         ImageButton musement_icon = header.findViewById(R.id.musement_icon);
-        Bundle arguments = activity.getIntent().getExtras();
-        UserDTO user;
-        if (arguments != null){
-            user = (UserDTO) arguments.get(IntentKeys.getUSER_KEY());
-        }else{
-            user = null;
-        }
+        User user = Util.getUser(activity.getIntent());
         bell.setOnClickListener(view -> OnClickBell(view, user));
         musement_icon.setOnClickListener(view -> OnClickMusementIcon(view, user));
     }
 
-    static public void OnClickBell(View view, UserDTO user){
+    static public void OnClickBell(View view, User user){
         Context context = view.getContext();
         if(context.getClass() == Notification.class){
             return;
@@ -71,7 +65,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static public void OnClickMusementIcon(View view, UserDTO user){
+    static public void OnClickMusementIcon(View view, User user){
         Context context = view.getContext();
         if(context.getClass() == Feed.class){
             return;
@@ -82,7 +76,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static private void OnClickFeed(View view, UserDTO user){
+    static private void OnClickFeed(View view, User user){
         Context context = view.getContext();
         if(context.getClass() == Feed.class){
             return;
@@ -93,7 +87,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static private void OnClickRecommendation(View view, UserDTO user){
+    static private void OnClickRecommendation(View view, User user){
         Context context = view.getContext();
         if(context.getClass() == Recommendation.class){
             return;
@@ -104,7 +98,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static private void OnClickInvitation(View view, UserDTO user){
+    static private void OnClickInvitation(View view, User user){
         Context context = view.getContext();
         if(context.getClass() == Invitation.class){
             return;
@@ -115,7 +109,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static private void OnClickProfile(View view, UserDTO user){
+    static private void OnClickProfile(View view, User user){
         Context context = view.getContext();
         if(context.getClass() == Profile.class){
             return;
@@ -126,7 +120,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static private void fillIntent(Intent intent, UserDTO user){
+    static private void fillIntent(Intent intent, User user){
         if (user != null){
             intent.putExtra(IntentKeys.getUSER_KEY(), user);
         }

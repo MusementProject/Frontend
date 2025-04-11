@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
-import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
 import com.example.musementfrontend.util.Util;
