@@ -109,7 +109,7 @@ public class Login extends AppCompatActivity {
                         Intent intent = new Intent(Login.this, Feed.class);
                         startActivity(intent);
                         finish();
-                    } // if not - other answers
+                    }
                 }
 
                 @Override
@@ -152,6 +152,7 @@ public class Login extends AppCompatActivity {
                             user.setId(result.getId());
                             user.setEmail(result.getEmail());
                             user.setUsername(result.getUsername());
+                            user.setNickname(result.getNickname());
                             user.setAccessToken(accessToken);
                             Log.d("token", accessToken);
                             Intent intent = new Intent(Login.this, Feed.class);

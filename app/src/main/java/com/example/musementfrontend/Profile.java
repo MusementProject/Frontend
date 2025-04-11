@@ -51,8 +51,7 @@ public class Profile extends AppCompatActivity {
 
         User user = Util.getUser(getIntent());
         if (user != null) {
-            TextView name = findViewById(R.id.name);
-            name.setText(user.getUsername());
+            fillUserInfo(user);
         }
         ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(view -> {
@@ -65,10 +64,12 @@ public class Profile extends AppCompatActivity {
                     Intent intent = new Intent(Profile.this, ProfileSettings.class);
                     intent.putExtra(IntentKeys.getUSER_KEY(), user);
                     startActivity(intent);
+                    finish();
                     return true;
                 }
                 if (itemId == R.id.log_out){
                     logOut();
+                    finish();
                     return true;
                 }
                 return true;
@@ -81,6 +82,13 @@ public class Profile extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+    private void fillUserInfo(User user){
+        TextView name = findViewById(R.id.name);
+        TextView nickname = findViewById(R.id.nickname);
+        name.setText(user.getUsername());
+        nickname.setText("@" + user.getNickname());
     }
 
     private void logOut(){
