@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
-import com.example.musementfrontend.dto.UserDTO;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
@@ -148,7 +148,7 @@ public class Login extends AppCompatActivity {
                         UserResponseLoginDTO result = response.body();
                         Log.d("token", accessToken);
                         if (result != null) {
-                            UserDTO user = new UserDTO();
+                            User user = new User();
                             user.setId(result.getId());
                             user.setEmail(result.getEmail());
                             user.setUsername(result.getUsername());
