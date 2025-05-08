@@ -98,29 +98,58 @@ public class Login extends AppCompatActivity {
     public void onClickSignInButton(View view) {
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
-        if (!isValidLoginData(usernameField, passwordField)) { return; }
+        if (!isValidLoginData(usernameField, passwordField)) return;
 
-        UserRequestLoginDTO userLogin = new UserRequestLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
+        UserRequestLoginDTO userLogin =
+                new UserRequestLoginDTO(
+                        usernameField.getText().toString().trim(),
+                        passwordField.getText().toString().trim()
+                );
+
         APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<UserResponseLoginDTO> call = apiService.userLogin(userLogin);
-        call.enqueue(new Callback<UserResponseLoginDTO>() {
+        apiService.userLogin(userLogin).enqueue(new Callback<UserResponseLoginDTO>() {
             @Override
-            public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
-                if (response.isSuccessful()) {
-                    Intent intent = new Intent(Login.this, Feed.class);
-                    startActivity(intent);
-                    finish();
-                } // if not - other answers
+            public void onResponse(Call<UserResponseLoginDTO> call,
+                                   Response<UserResponseLoginDTO> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(Login.this,
+                            "Ошибка входа: " + response.code(),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                UserResponseLoginDTO dto = response.body();
+                String jwt = dto.getToken();
+                if (jwt == null || jwt.isEmpty()) {
+                    Toast.makeText(Login.this,
+                            "Не получили токен, попробуйте снова",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Собираем фронтовый User
+                User user = new User();
+                user.setId(dto.getId());
+                user.setUsername(dto.getUsername());
+                user.setEmail(dto.getEmail());
+                user.setAccessToken(jwt);
+
+                // Переходим в следующий экран, передавая User
+                Intent intent = new Intent(Login.this, Feed.class);
+                intent.putExtra("user", user);
+                startActivity(intent);
+                finish();
             }
 
             @Override
             public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
-                Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                toast.show();
+                Toast.makeText(Login.this,
+                        "Ошибка сети: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
             }
         });
-
     }
+
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
         if (loginField.getText().toString().isBlank() || passwordField.getText().toString().isBlank()) {
