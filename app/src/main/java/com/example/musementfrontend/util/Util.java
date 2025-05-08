@@ -1,7 +1,9 @@
 package com.example.musementfrontend.util;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.dto.User;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -43,5 +46,26 @@ public class Util {
             return (User) arguments.get(IntentKeys.getUSER_KEY());
         }
         return null;
+    }
+
+    /**
+     *
+     * @param ctx
+     * @param uri
+     * @return
+     */
+    public static byte[] uriToBytes(Context ctx, Uri uri) {
+        try (InputStream in = ctx.getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read URI", e);
+        }
     }
 }

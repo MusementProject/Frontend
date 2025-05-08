@@ -98,27 +98,28 @@ public class Login extends AppCompatActivity {
     public void onClickSignInButton(View view) {
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
-        if (isValidLoginData(usernameField, passwordField)) {
-            UserRequestLoginDTO userLogin = new UserRequestLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
-            APIService apiService = APIClient.getClient().create(APIService.class);
-            Call<UserResponseLoginDTO> call = apiService.userLogin(userLogin);
-            call.enqueue(new Callback<UserResponseLoginDTO>() {
-                @Override
-                public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
-                    if (response.isSuccessful()) {
-                        Intent intent = new Intent(Login.this, Feed.class);
-                        startActivity(intent);
-                        finish();
-                    } // if not - other answers
-                }
+        if (!isValidLoginData(usernameField, passwordField)) { return; }
 
-                @Override
-                public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
-                    Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                    toast.show();
-                }
-            });
-        }
+        UserRequestLoginDTO userLogin = new UserRequestLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<UserResponseLoginDTO> call = apiService.userLogin(userLogin);
+        call.enqueue(new Callback<UserResponseLoginDTO>() {
+            @Override
+            public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
+                if (response.isSuccessful()) {
+                    Intent intent = new Intent(Login.this, Feed.class);
+                    startActivity(intent);
+                    finish();
+                } // if not - other answers
+            }
+
+            @Override
+            public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
+                Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
+
     }
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
