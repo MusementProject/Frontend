@@ -31,7 +31,7 @@ public class PlaylistStatistics extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+//        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlist_statistics);
         UtilButtons.Init(this);
 

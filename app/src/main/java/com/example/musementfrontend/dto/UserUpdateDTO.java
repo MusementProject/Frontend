@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserUpdateRequest {
+public class UserUpdateDTO {
     private String username;
-    private String nickname;
+    private String email;
     private String bio;
+    private String nickname;
     private String profilePicture;
-    private String telegram;
 }
