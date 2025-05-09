@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Parcelable {
     private Long id;
     private String googleId;
