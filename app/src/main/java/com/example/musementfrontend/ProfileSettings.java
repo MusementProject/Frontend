@@ -91,7 +91,9 @@ public class ProfileSettings extends AppCompatActivity {
 
     private void uploadNewAvatar(Uri uri) {
         MediaUploader.uploadAvatar(
-                this, uri, "Bearer " + accessToken,
+                this,
+                uri,
+                "Bearer " + accessToken,
                 new MediaUploader.OnResultListener() {
                     @Override
                     public void onSuccess(String url) {

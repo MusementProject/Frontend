@@ -184,6 +184,7 @@ public class Profile extends AppCompatActivity {
         // Обновляем UI из userDTO
         if (userDTO != null) {
             name.setText(userDTO.getUsername());
+
             setUserAvatar();
         }
     }

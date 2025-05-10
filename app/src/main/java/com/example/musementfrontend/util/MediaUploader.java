@@ -19,64 +19,51 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class MediaUploader {
-    public static byte[] uriToBytes(Context ctx, Uri uri) {
-        try (InputStream in = ctx.getContentResolver().openInputStream(uri);
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-
-            byte[] buf = new byte[4096];
-            int len;
-            while ((len = in.read(buf)) != -1) {
-                out.write(buf, 0, len);
-            }
-            return out.toByteArray();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read URI", e);
-        }
-    }
     public interface OnResultListener {
         void onSuccess(String imageUrl);
         void onError(String errorMessage);
     }
 
+    /**
+     * Загружает аватарку на эндпоинт /api/media/upload
+     *
+     * @param ctx        любой Context
+     * @param uri        Uri картинки
+     * @param authHeader токен в формате "Bearer …"
+     * @param listener   коллбэк успех/ошибка
+     */
     public static void uploadAvatar(
             Context ctx,
             Uri uri,
-            String bearerToken,
-            OnResultListener listener) {
+            String authHeader,
+            OnResultListener listener
+    ) {
+        MultipartBody.Part part;
+        try {
+            part = MediaUploadUtil.prepareFilePart(ctx, "file", uri);
+        } catch (IOException e) {
+            listener.onError("Не удалось прочитать изображение");
+            return;
+        }
 
-        // 1) подготовка MultipartBody.Part
-        byte[] data = uriToBytes(ctx, uri);
-        String mime = ctx.getContentResolver().getType(uri);
-        RequestBody rb = RequestBody.create(
-                mime != null ? MediaType.parse(mime)
-                        : MediaType.parse("image/*"),
-                data
-        );
-        MultipartBody.Part part = MultipartBody.Part.createFormData(
-                "file", "avatar.jpg", rb
-        );
-
-        // 2) Получаем APIService из вашего APIClient
-        APIService api = APIClient.getClient()
-                .create(APIService.class);
-
-        // 3) Делаем вызов
-        api.uploadMedia(bearerToken, part)
+        APIService api = APIClient.getClient().create(APIService.class);
+        api.uploadMedia(authHeader, part)
                 .enqueue(new Callback<ImageResponseDTO>() {
                     @Override
                     public void onResponse(
                             Call<ImageResponseDTO> call,
-                            Response<ImageResponseDTO> resp) {
+                            Response<ImageResponseDTO> resp
+                    ) {
                         if (resp.isSuccessful() && resp.body() != null) {
+                            // допустим, DTO содержит getUrl()
                             listener.onSuccess(resp.body().getUrl());
                         } else {
-                            listener.onError("Server error: " + resp.code());
+                            listener.onError("Сервер вернул " + resp.code());
                         }
                     }
                     @Override
                     public void onFailure(Call<ImageResponseDTO> call, Throwable t) {
-                        listener.onError("Network failure: " + t.getMessage());
+                        listener.onError("Сеть: " + t.getMessage());
                     }
                 });
     }

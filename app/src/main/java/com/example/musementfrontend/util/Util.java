@@ -47,25 +47,4 @@ public class Util {
         }
         return null;
     }
-
-    /**
-     *
-     * @param ctx
-     * @param uri
-     * @return
-     */
-    public static byte[] uriToBytes(Context ctx, Uri uri) {
-        try (InputStream in = ctx.getContentResolver().openInputStream(uri);
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-
-            byte[] buf = new byte[4096];
-            int len;
-            while ((len = in.read(buf)) != -1) {
-                out.write(buf, 0, len);
-            }
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read URI", e);
-        }
-    }
 }
