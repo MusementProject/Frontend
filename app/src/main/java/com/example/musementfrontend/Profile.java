@@ -71,14 +71,14 @@ public class Profile extends AppCompatActivity {
             inflater.inflate(R.menu.menu, menu.getMenu());
             menu.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
-                if (itemId == R.id.profile_settings){
+                if (itemId == R.id.profile_settings) {
                     Intent intent = new Intent(Profile.this, ProfileSettings.class);
                     intent.putExtra(IntentKeys.getUSER_KEY(), user);
                     startActivity(intent);
                     finish();
                     return true;
                 }
-                if (itemId == R.id.log_out){
+                if (itemId == R.id.log_out) {
                     logOut();
                     finish();
                     return true;
@@ -95,18 +95,18 @@ public class Profile extends AppCompatActivity {
         return true;
     }
 
-    private void fillUserInfo(User user){
+    private void fillUserInfo(User user) {
         TextView name = findViewById(R.id.name);
         TextView nickname = findViewById(R.id.nickname);
         name.setText(user.getUsername());
         nickname.setText("@" + user.getNickname());
     }
 
-    private void logOut(){
+    private void logOut() {
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if (googleSignInAccount != null){
+        if (googleSignInAccount != null) {
             googleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -138,43 +138,11 @@ public class Profile extends AppCompatActivity {
     }
 
     public void OnClickFriends(View view) {
-//        List<FriendDTO> friendList = Arrays.asList(
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
-//                new FriendDTO(2L, "amiasleep", "Малышева Анастасия", null, true)
-//        );
-
-        APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<List<FriendDTO>> call = apiService.getAllUserFriends("Bearer " + user.getAccessToken(), user.getId());
-        call.enqueue(new Callback<List<FriendDTO>>() {
-            @Override
-            public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
-                    FriendsDialogFragment dialog = new FriendsDialogFragment();
-                    dialog.setFriends(friendList);
-                    dialog.show(getSupportFragmentManager(), "friends");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<FriendDTO>> call, Throwable t) {
-                Log.e("Friends", "API call failed", t);
-            }
-        });
+        FriendsDialogFragment dialog = new FriendsDialogFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(IntentKeys.getUSER_KEY(), user);
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(), "friends");
     }
 
     public void OnClickTickets(View view) {

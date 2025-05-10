@@ -45,4 +45,10 @@ public interface APIService {
     @GET("/api/friends/getAll/{userId}")
     Call<List<FriendDTO>> getAllUserFriends(@Header("Authorization") String authHeader, @Path("userId") long id);
 
+    @GET("/api/friends/getFollowing/{userId}")
+    Call<List<FriendDTO>> getAllUserFollowing(@Header("Authorization") String authHeader, @Path("userId") long id);
+
+    @GET("/api/friends/getFollowers/{userId}")
+    Call<List<FriendDTO>> getAllUserFollowers(@Header("Authorization") String authHeader, @Path("userId") long id);
+
 }
