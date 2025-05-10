@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Musement</string>
     <string name="change_profile_picture">Change profile picture</string>
+    <string name="username_handle">\@%1$s</string>
 </resources>

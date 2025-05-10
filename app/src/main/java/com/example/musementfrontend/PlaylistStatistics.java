@@ -13,13 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.musementfrontend.pojo.Artist;
 import com.example.musementfrontend.pojo.Playlist;
 import com.example.musementfrontend.util.Util;
+
 import java.util.List;
 import java.util.Map;
+
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.util.UtilButtons;
 
@@ -31,13 +33,12 @@ public class PlaylistStatistics extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlist_statistics);
         UtilButtons.Init(this);
 
         Intent intent = getIntent();
         Playlist playlist = (Playlist) intent.getSerializableExtra("playlist");
-        if(playlist == null) {
+        if (playlist == null) {
             Toast.makeText(this, "Playlist not found", Toast.LENGTH_SHORT).show();
             playlist = new Playlist(0, "Test Playlist", null);
         }
@@ -82,7 +83,7 @@ public class PlaylistStatistics extends AppCompatActivity {
 
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) artistItem.getLayoutParams();
 
-            params.setMargins(0, 20,0 , 20);
+            params.setMargins(0, 20, 0, 20);
             artistItem.setLayoutParams(params);
             feedLayout.addView(artistItem);
         }

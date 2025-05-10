@@ -23,7 +23,6 @@ public class Feed extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_feed);
         UtilButtons.Init(this);
         ConstraintLayout feed = findViewById(R.id.feed_item);
