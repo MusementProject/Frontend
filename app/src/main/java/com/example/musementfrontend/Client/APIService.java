@@ -1,5 +1,6 @@
 package com.example.musementfrontend.Client;
 
+import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
 import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
@@ -41,5 +42,7 @@ public interface APIService {
     @GET("/api/concerts/attend_user/{userId}")
     Call<List<Concert>> getUserConcerts(@Header("Authorization") String authHeader, long id);
 
+    @GET("/api/friends/getAll/{userId}")
+    Call<List<FriendDTO>> getAllUserFriends(@Header("Authorization") String authHeader, @Path("userId") long id);
 
 }

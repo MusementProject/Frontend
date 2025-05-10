@@ -2,6 +2,7 @@ package com.example.musementfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -15,6 +16,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.musementfrontend.Client.APIClient;
+import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dialogs.FriendsDialogFragment;
+import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.IntentKeys;
@@ -30,7 +35,12 @@ import com.google.android.gms.tasks.Task;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Profile extends AppCompatActivity {
 
@@ -53,6 +63,7 @@ public class Profile extends AppCompatActivity {
         if (user != null) {
             fillUserInfo(user);
         }
+        this.user = user;
         ImageButton settings = findViewById(R.id.settings);
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
@@ -112,7 +123,7 @@ public class Profile extends AppCompatActivity {
         // get info about user avatar
         ImageView avatar = findViewById(R.id.avatar);
         Glide.with(this)
-                .load("https://zefirka.club/uploads/posts/2023-01/1673278260_2-zefirka-club-p-serii-chelovek-na-avu-2.png")
+                .load(Util.getProfilePhotoDefault())
                 .circleCrop()
                 .into(avatar);
     }
@@ -127,7 +138,43 @@ public class Profile extends AppCompatActivity {
     }
 
     public void OnClickFriends(View view) {
-        // new fragment with friends
+//        List<FriendDTO> friendList = Arrays.asList(
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(1L, "amiasleep", "Малышева Анастасия", null, true),
+//                new FriendDTO(2L, "amiasleep", "Малышева Анастасия", null, true)
+//        );
+
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<List<FriendDTO>> call = apiService.getAllUserFriends("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<FriendDTO>>() {
+            @Override
+            public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
+                if(response.isSuccessful() && response.body() != null){
+                    List<FriendDTO> friendList= response.body();
+                    FriendsDialogFragment dialog = new FriendsDialogFragment();
+                    dialog.setFriends(friendList);
+                    dialog.show(getSupportFragmentManager(), "friends");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FriendDTO>> call, Throwable t) {
+                Log.e("Friends", "API call failed", t);
+            }
+        });
     }
 
     public void OnClickTickets(View view) {
