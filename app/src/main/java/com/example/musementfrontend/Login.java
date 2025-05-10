@@ -9,14 +9,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
-import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
@@ -39,14 +37,14 @@ public class Login extends AppCompatActivity {
     private GoogleSignInOptions googleSignInOptions;
     private GoogleSignInClient googleSignInClient;
     private SignInButton googleSignInButton;
-    public  ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    public ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
                     Intent data = result.getData();
                     Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                     try {
                         task.getResult(ApiException.class);
-                        finish();
                         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
                         if (googleSignInAccount != null) {
                             sendInfo(googleSignInAccount);
@@ -58,11 +56,9 @@ public class Login extends AppCompatActivity {
                 }
             });
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         Util.setIcon(this);
         initLoginField();
@@ -100,17 +96,15 @@ public class Login extends AppCompatActivity {
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
         if (!isValidLoginData(usernameField, passwordField)) return;
 
-        UserRequestLoginDTO userLogin =
-                new UserRequestLoginDTO(
-                        usernameField.getText().toString().trim(),
-                        passwordField.getText().toString().trim()
-                );
+        UserRequestLoginDTO userLogin = new UserRequestLoginDTO(
+                usernameField.getText().toString().trim(),
+                passwordField.getText().toString().trim()
+        );
 
         APIService apiService = APIClient.getClient().create(APIService.class);
         apiService.userLogin(userLogin).enqueue(new Callback<UserResponseLoginDTO>() {
             @Override
-            public void onResponse(Call<UserResponseLoginDTO> call,
-                                   Response<UserResponseLoginDTO> response) {
+            public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
                 if (!response.isSuccessful() || response.body() == null) {
                     Toast.makeText(Login.this,
                             "Ошибка входа: " + response.code(),
@@ -127,16 +121,15 @@ public class Login extends AppCompatActivity {
                     return;
                 }
 
-                // Собираем фронтовый User
-                User user = new User();
-                user.setId(dto.getId());
-                user.setUsername(dto.getUsername());
-                user.setEmail(dto.getEmail());
-                user.setAccessToken(jwt);
-
-                // Переходим в следующий экран, передавая User
-                Intent intent = new Intent(Login.this, Feed.class);
-                intent.putExtra("user", user);
+                // Переходим в Profile, передавая данные UserDTO
+                Intent intent = new Intent(Login.this, Profile.class);
+                intent.putExtra("username", dto.getUsername());
+                intent.putExtra("email", dto.getEmail());
+                intent.putExtra("bio", ""); // Если bio нет в ответе, задаём пустое
+                intent.putExtra("nickname", dto.getUsername()); // Используем username как nickname, если нет отдельного поля
+                intent.putExtra("profilePicture", ""); // Задаём пустое, если нет аватара
+                intent.putExtra("accessToken", jwt);
+                intent.putExtra("userId", dto.getId());
                 startActivity(intent);
                 finish();
             }
@@ -150,11 +143,9 @@ public class Login extends AppCompatActivity {
         });
     }
 
-
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
         if (loginField.getText().toString().isBlank() || passwordField.getText().toString().isBlank()) {
-            Toast toast = Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG);
-            toast.show();
+            Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG).show();
             return false;
         }
         return true;
@@ -165,36 +156,42 @@ public class Login extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void sendInfo(GoogleSignInAccount googleAccout){
-        String accessToken = googleAccout.getIdToken();
-        if (accessToken != null){
+    private void sendInfo(GoogleSignInAccount googleAccount) {
+        String accessToken = googleAccount.getIdToken();
+        if (accessToken != null) {
             APIService apiService = APIClient.getClient().create(APIService.class);
             UserRequestLoginWithGoogle userRequest = new UserRequestLoginWithGoogle(accessToken);
-            Call<UserResponseLoginDTO> call = apiService.userLoginWithGoogle(userRequest);
-            call.enqueue(new Callback<UserResponseLoginDTO>() {
+            apiService.userLoginWithGoogle(userRequest).enqueue(new Callback<UserResponseLoginDTO>() {
                 @Override
                 public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
-                    if (response.isSuccessful()){
+                    if (response.isSuccessful() && response.body() != null) {
                         UserResponseLoginDTO result = response.body();
-                        Log.d("token", accessToken);
-                        if (result != null) {
-                            User user = new User();
-                            user.setId(result.getId());
-                            user.setEmail(result.getEmail());
-                            user.setUsername(result.getUsername());
-                            user.setAccessToken(accessToken);
-                            Log.d("token", accessToken);
-                            Intent intent = new Intent(Login.this, Feed.class);
-                            intent.putExtra("user", user);
-                            startActivity(intent);
+                        String jwt = result.getToken();
+                        if (jwt == null || jwt.isEmpty()) {
+                            Toast.makeText(Login.this,
+                                    "Не получили токен от сервера", Toast.LENGTH_LONG).show();
+                            return;
                         }
+                        // Переходим в Profile, передавая данные UserDTO
+                        Intent intent = new Intent(Login.this, Profile.class);
+                        intent.putExtra("username", result.getUsername());
+                        intent.putExtra("email", result.getEmail());
+                        intent.putExtra("bio", ""); // Если bio нет в ответе, задаём пустое
+                        intent.putExtra("nickname", result.getUsername()); // Используем username как nickname
+                        intent.putExtra("profilePicture", ""); // Задаём пустое, если нет аватара
+                        intent.putExtra("accessToken", jwt);
+                        intent.putExtra("userId", result.getId());
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(Login.this,
+                                "Ошибка авторизации: " + response.code(), Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
-                    Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         }

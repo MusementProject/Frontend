@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserUpdateDTO {
+public class UserDTO {
     private String username;
     private String email;
     private String bio;

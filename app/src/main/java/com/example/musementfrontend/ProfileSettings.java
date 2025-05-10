@@ -11,15 +11,14 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.activity.EdgeToEdge;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.User;
-import com.example.musementfrontend.dto.UserUpdateDTO;
+import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.util.MediaUploader;
-import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 
 import retrofit2.Call;
@@ -29,40 +28,45 @@ import retrofit2.Response;
 public class ProfileSettings extends AppCompatActivity {
     private ImageView avatarView;
     private ActivityResultLauncher<String> pickLauncher;
-    private User user;
+    private UserDTO userDTO;
     private APIService api;
+    private String accessToken;
+    private long userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile_settings);
         UtilButtons.Init(this);
+        avatarView = findViewById(R.id.ivAvatar);
 
         api = APIClient.getClient().create(APIService.class);
 
-        // 1) Получаем User из Intent
-        user = Util.getUser(getIntent());
-        if (user == null) {
+        // Получаем данные из Intent
+        Intent intent = getIntent();
+        userDTO = new UserDTO(
+                intent.getStringExtra("username"),
+                intent.getStringExtra("email"),
+                intent.getStringExtra("bio"),
+                intent.getStringExtra("nickname"),
+                intent.getStringExtra("profilePicture")
+        );
+        accessToken = intent.getStringExtra("accessToken");
+        userId = intent.getLongExtra("userId", 0);
+
+        // Проверяем, есть ли данные
+        if (userDTO.getUsername() == null || accessToken == null || userId == 0) {
             Toast.makeText(this, "Сессия истекла, зайдите заново", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // 2) Инициализируем поля
-        setUsername(user.getUsername());
-        setNickname(user.getNickname());
-        setBio(user.getBio());
-        setTelegram(user.getTelegram());
-
-        // 3) AVATAR
-        avatarView = findViewById(R.id.ivAvatar);
-        if (user.getPhotoUrl() != null) {
-            Glide.with(this)
-                    .load(user.getPhotoUrl())
-                    .circleCrop()
-                    .into(avatarView);
-        }
+        // Инициализируем поля
+        setUsername(userDTO.getUsername());
+        setNickname(userDTO.getNickname());
+        setBio(userDTO.getBio());
+        setTelegram(""); // Если telegram не в UserDTO, оставляем пустым
+        setAvatar();
 
         // Лаунчер для выбора картинки
         pickLauncher = registerForActivityResult(
@@ -77,24 +81,24 @@ public class ProfileSettings extends AppCompatActivity {
         findViewById(R.id.btnChangeAvatar)
                 .setOnClickListener(v -> pickLauncher.launch("image/*"));
 
-        // 4) SAVE PROFILE
+        // SAVE PROFILE
         Button saveBtn = findViewById(R.id.btnSave);
         saveBtn.setOnClickListener(v -> saveProfile());
     }
 
     private void uploadNewAvatar(Uri uri) {
         MediaUploader.uploadAvatar(
-                this, uri, "Bearer " + user.getAccessToken(),
+                this, uri, "Bearer " + accessToken,
                 new MediaUploader.OnResultListener() {
                     @Override
                     public void onSuccess(String url) {
-                        // обновляем UI
+                        // Обновляем UI
                         Glide.with(ProfileSettings.this)
                                 .load(url)
                                 .circleCrop()
                                 .into(avatarView);
-                        // сохраняем в user
-                        user.setPhotoUrl(url);
+                        // Сохраняем в userDTO
+                        userDTO.setProfilePicture(url);
                     }
 
                     @Override
@@ -108,33 +112,50 @@ public class ProfileSettings extends AppCompatActivity {
     }
 
     private void saveProfile() {
-        // собираем данные из полей
+        // Собираем данные из полей
         String username = ((EditText) findViewById(R.id.etName)).getText().toString().trim();
         String nickname = ((EditText) findViewById(R.id.etNickname)).getText().toString().trim();
         String bio = ((EditText) findViewById(R.id.etBio)).getText().toString().trim();
         String telegram = ((EditText) findViewById(R.id.etTelegram)).getText().toString().trim();
         String fullName = ((EditText) findViewById(R.id.etNickname)).getText().toString().trim();
 
-        UserUpdateDTO req = new UserUpdateDTO(
+        UserDTO req = new UserDTO(
                 username,
-                user.getEmail(),
+                userDTO.getEmail(),
                 bio,
                 fullName,
-                user.getPhotoUrl()   // URL выставленный после uploadNewAvatar
+                userDTO.getProfilePicture()   // URL выставленный после uploadNewAvatar
         );
 
         api.updateUser(
-                        "Bearer " + user.getAccessToken(),
-                        String.valueOf(user.getId()),
+                        "Bearer " + accessToken,
+                        String.valueOf(userId),
                         req
                 )
                 .enqueue(new Callback<User>() {
                     @Override
                     public void onResponse(Call<User> call, Response<User> resp) {
                         if (resp.isSuccessful() && resp.body() != null) {
-                            user = resp.body();
+                            // Обновляем userDTO из ответа сервера
+                            User serverUser = resp.body();
+                            userDTO.setUsername(serverUser.getUsername());
+                            userDTO.setEmail(serverUser.getEmail());
+                            userDTO.setBio(serverUser.getBio());
+                            userDTO.setNickname(serverUser.getNickname());
+                            userDTO.setProfilePicture(serverUser.getProfilePicture());
+
                             Toast.makeText(ProfileSettings.this,
                                     "Профиль сохранён", Toast.LENGTH_SHORT).show();
+
+                            // Возвращаем обновлённые данные через Intent
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("username", userDTO.getUsername());
+                            resultIntent.putExtra("email", userDTO.getEmail());
+                            resultIntent.putExtra("bio", userDTO.getBio());
+                            resultIntent.putExtra("nickname", userDTO.getNickname());
+                            resultIntent.putExtra("profilePicture", userDTO.getProfilePicture());
+                            setResult(RESULT_OK, resultIntent);
+                            finish(); // Закрываем ProfileSettings
                         } else {
                             Toast.makeText(ProfileSettings.this,
                                     "Ошибка сохранения: " + resp.code(),
@@ -151,7 +172,7 @@ public class ProfileSettings extends AppCompatActivity {
                 });
     }
 
-    // вспомогательные методы для установки текстов
+    // Вспомогательные методы для установки текстов
     private void setUsername(String name) {
         EditText et = findViewById(R.id.etName);
         et.setText(name == null ? "" : name);
@@ -170,5 +191,23 @@ public class ProfileSettings extends AppCompatActivity {
     private void setTelegram(String tg) {
         EditText et = findViewById(R.id.etTelegram);
         et.setText(tg == null ? "" : tg);
+    }
+
+    private void setAvatar() {
+        String url = userDTO.getProfilePicture();
+        if (url != null && !url.isEmpty() && !url.equals("null")) {
+            Glide.with(this)
+                    .load(url)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE) // Не кэшировать на диск
+                    .skipMemoryCache(true)
+                    .error(R.drawable.default_avatar)
+                    .circleCrop()
+                    .into(avatarView);
+        } else {
+            Glide.with(this)
+                    .load(R.drawable.default_avatar)
+                    .circleCrop()
+                    .into(avatarView);
+        }
     }
 }
