@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
@@ -104,10 +105,12 @@ public class Login extends AppCompatActivity {
         APIService apiService = APIClient.getClient().create(APIService.class);
         apiService.userLogin(userLogin).enqueue(new Callback<UserResponseLoginDTO>() {
             @Override
-            public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
+            public void onResponse(
+                    @NonNull Call<UserResponseLoginDTO> call,
+                    @NonNull Response<UserResponseLoginDTO> response) {
                 if (!response.isSuccessful() || response.body() == null) {
                     Toast.makeText(Login.this,
-                            "Ошибка входа: " + response.code(),
+                            "Error: " + response.code() + " " + response.message(),
                             Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -116,31 +119,34 @@ public class Login extends AppCompatActivity {
                 String jwt = dto.getToken();
                 if (jwt == null || jwt.isEmpty()) {
                     Toast.makeText(Login.this,
-                            "Не получили токен, попробуйте снова",
+                            "Error: token is null or empty",
                             Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                // Переходим в Profile, передавая данные UserDTO
-                Intent intent = new Intent(Login.this, Profile.class);
-                intent.putExtra("username", dto.getUsername());
-                intent.putExtra("email", dto.getEmail());
-                intent.putExtra("bio", ""); // Если bio нет в ответе, задаём пустое
-                intent.putExtra("nickname", dto.getUsername()); // Используем username как nickname, если нет отдельного поля
-                intent.putExtra("profilePicture", ""); // Задаём пустое, если нет аватара
-                intent.putExtra("accessToken", jwt);
-                intent.putExtra("userId", dto.getId());
+                // Switch to Profile activity, passing UserDTO data
+                Intent intent = Login.this.getIntent(dto, jwt);
                 startActivity(intent);
                 finish();
             }
 
             @Override
-            public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
+            public void onFailure(@NonNull Call<UserResponseLoginDTO> call, @NonNull Throwable t) {
                 Toast.makeText(Login.this,
-                        "Ошибка сети: " + t.getMessage(),
+                        "Network error: " + t.getMessage(),
                         Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @NonNull
+    private Intent getIntent(UserResponseLoginDTO dto, String jwt) {
+        Intent intent = new Intent(Login.this, Profile.class);
+        intent.putExtra("username", dto.getUsername());
+        intent.putExtra("email", dto.getEmail());
+        intent.putExtra("accessToken", jwt);
+        intent.putExtra("userId", dto.getId());
+        return intent;
     }
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
@@ -163,34 +169,30 @@ public class Login extends AppCompatActivity {
             UserRequestLoginWithGoogle userRequest = new UserRequestLoginWithGoogle(accessToken);
             apiService.userLoginWithGoogle(userRequest).enqueue(new Callback<UserResponseLoginDTO>() {
                 @Override
-                public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
+                public void onResponse(@NonNull Call<UserResponseLoginDTO> call,
+                                       @NonNull Response<UserResponseLoginDTO> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponseLoginDTO result = response.body();
                         String jwt = result.getToken();
                         if (jwt == null || jwt.isEmpty()) {
                             Toast.makeText(Login.this,
-                                    "Не получили токен от сервера", Toast.LENGTH_LONG).show();
+                                    "Error: token is null or empty",
+                                    Toast.LENGTH_LONG).show();
                             return;
                         }
-                        // Переходим в Profile, передавая данные UserDTO
-                        Intent intent = new Intent(Login.this, Profile.class);
-                        intent.putExtra("username", result.getUsername());
-                        intent.putExtra("email", result.getEmail());
-                        intent.putExtra("bio", ""); // Если bio нет в ответе, задаём пустое
-                        intent.putExtra("nickname", result.getUsername()); // Используем username как nickname
-                        intent.putExtra("profilePicture", ""); // Задаём пустое, если нет аватара
-                        intent.putExtra("accessToken", jwt);
-                        intent.putExtra("userId", result.getId());
+                        // Switch to Profile activity, passing UserDTO data
+                        Intent intent = getIntent(result, jwt);
                         startActivity(intent);
                         finish();
                     } else {
                         Toast.makeText(Login.this,
-                                "Ошибка авторизации: " + response.code(), Toast.LENGTH_LONG).show();
+                                "Error during Google login: " + response.code() + " " + response.message(),
+                                Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
+                public void onFailure(@NonNull Call<UserResponseLoginDTO> call, @NonNull Throwable t) {
                     Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });

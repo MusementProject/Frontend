@@ -9,6 +9,7 @@ import android.webkit.MimeTypeMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -17,31 +18,32 @@ import okhttp3.RequestBody;
 public class MediaUploadUtil {
 
     /**
-     * Читает картинку из Uri, сжимает её до JPEG 80% и упаковывает в MultipartBody.Part.
+     * Reads an image from Uri, compresses it to JPEG 80% and packs it into MultipartBody.Part.
      *
-     * @param ctx      — любой Context
-     * @param partName — имя поля в form-data (у вас "file")
-     * @param fileUri  — Uri картинки (галерея или камера)
+     * @param ctx      — any Context
+     * @param partName — a name of the part in the multipart request (e.g. "file")
+     * @param fileUri  — Uri of the image
      */
     public static MultipartBody.Part prepareFilePart(
             Context ctx,
             String partName,
             Uri fileUri
     ) throws IOException {
-        // 1) MIME-тип и расширение
+        // 1) MIME type and extension
         String mimeType = ctx.getContentResolver().getType(fileUri);
         String extension = MimeTypeMap.getSingleton()
                 .getExtensionFromMimeType(mimeType);
-        if (extension == null) extension = "jpg";
+        if (extension == null)
+            extension = "jpg";
 
-        // 2) Считаем размеры, чтобы не держать в памяти гигант
+        // 2) calculates dimensions of the image
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
         try (InputStream is = ctx.getContentResolver().openInputStream(fileUri)) {
             BitmapFactory.decodeStream(is, null, opts);
         }
 
-        // 3) Сэмплируем, чтобы максимальная сторона ≲800px
+        // 3) sample size so that the image is not larger than 800 px in any dimension
         int maxDim = Math.max(opts.outWidth, opts.outHeight);
         int inSample = 1;
         while (maxDim / inSample > 800) {
@@ -50,27 +52,30 @@ public class MediaUploadUtil {
         opts.inJustDecodeBounds = false;
         opts.inSampleSize = inSample;
 
-        // 4) Собираем Bitmap
+        // 4) decode the image into Bitmap
         Bitmap bitmap;
         try (InputStream is = ctx.getContentResolver().openInputStream(fileUri)) {
             bitmap = BitmapFactory.decodeStream(is, null, opts);
         }
 
-        // 5) Итеративно сжимаем в JPEG, снижая quality, чтобы укладываться в 1 MB
+        // 5) iteratively compress the image to JPEG (80% quality, <= 1 MB)
         int quality = 80;
         byte[] imageBytes;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         do {
             baos.reset();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+            Objects.requireNonNull(bitmap).compress(Bitmap.CompressFormat.JPEG, quality, baos);
             imageBytes = baos.toByteArray();
-            quality = Math.max(10, quality - 5);  // не падаем ниже quality=10
+
+            // no less than 10% quality
+            quality = Math.max(10, quality - 5);
+
         } while (imageBytes.length > 1_024 * 1_024 && quality > 10);
 
-        // 6) Формируем RequestBody и Multipart
+        // 6) create MultipartBody.Part
         RequestBody reqBody = RequestBody.create(
-                MediaType.parse(mimeType),
-                imageBytes
+                imageBytes,
+                MediaType.parse(Objects.requireNonNull(mimeType))
         );
         String filename = "upload." + extension;
         return MultipartBody.Part.createFormData(

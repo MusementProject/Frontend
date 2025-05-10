@@ -33,10 +33,12 @@ public interface APIService {
     Call<UserResponseRegisterDTO> userRegister(@Body UserRequestRegisterDTO userRegister);
 
     @POST("/api/login/google")
-    Call<UserResponseLoginDTO> userLoginWithGoogle(@Body UserRequestLoginWithGoogle userLoginGoogle);
+    Call<UserResponseLoginDTO> userLoginWithGoogle(
+            @Body UserRequestLoginWithGoogle userLoginGoogle);
 
     @POST("/api/playlists/add")
-    Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
+    Call<List<PlaylistInfo>> addPlaylist(
+            @Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
 
     @PATCH("/api/users/{id}")
     Call<User> updateUser(
