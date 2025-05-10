@@ -2,6 +2,7 @@ package com.example.musementfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -11,6 +12,10 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.UserDTO;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.Util;
@@ -31,6 +37,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,57 +57,95 @@ public class Profile extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         UtilButtons.Init(this);
 
-        // Инициализируем API-клиент
-        api = APIClient.getClient().create(APIService.class);
+        profileSettingsLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        // Извлеките из data те поля, которые может изменить пользователь
+                        String newUsername = data.getStringExtra("username");
+                        String newBio      = data.getStringExtra("bio");
+                        String newNick     = data.getStringExtra("nickname");
+                        String newAvatar   = data.getStringExtra("profilePicture");
 
-        // Получаем данные пользователя из Intent
+                        // Обновите userDTO и UI
+                        userDTO.setUsername(newUsername);
+                        userDTO.setBio(newBio);
+                        userDTO.setNickname(newNick);
+                        userDTO.setProfilePicture(newAvatar);
+
+                        name.setText(newUsername);
+                        setUserAvatar();
+                    }
+                }
+        );
+
+        // 1) Инициализируем API и вытаскиваем токен + id
+        api = APIClient.getClient().create(APIService.class);
         Intent intent = getIntent();
+        accessToken = intent.getStringExtra("accessToken");
+        userId = intent.getLongExtra("userId", 0L);
+
+        // 2) Подготовим DTO из Intent (для мгновенного UI) — аватарки пока нет
         userDTO = new UserDTO(
                 intent.getStringExtra("username"),
                 intent.getStringExtra("email"),
                 intent.getStringExtra("bio"),
                 intent.getStringExtra("nickname"),
-                intent.getStringExtra("profilePicture")
+                null
         );
-        accessToken = intent.getStringExtra("accessToken");
-        userId = intent.getLongExtra("userId", 0);
 
-        // Проверяем, есть ли данные
-        if (userDTO.getUsername() == null || accessToken == null || userId == 0) {
-            Toast.makeText(this, "Сессия истекла, зайдите заново", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        // Находим вьюхи
+        // 3) Найдём вьюхи и сразу выставим имя + дефолтную картинку
         name = findViewById(R.id.name);
         avatar = findViewById(R.id.avatar);
         ImageButton settings = findViewById(R.id.settings);
 
-        // Инициализируем ActivityResultLauncher
-        profileSettingsLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK) {
-                        Intent data = result.getData();
-                        if (data != null) {
-                            // Обновляем userDTO из возвращённых данных
-                            userDTO.setUsername(data.getStringExtra("username"));
-                            userDTO.setEmail(data.getStringExtra("email"));
-                            userDTO.setBio(data.getStringExtra("bio"));
-                            userDTO.setNickname(data.getStringExtra("nickname"));
-                            userDTO.setProfilePicture(data.getStringExtra("profilePicture"));
+        name.setText(userDTO.getUsername());
+        setUserAvatar();
+
+        // 4) Дёргаем сервер за полными данными текущего пользователя
+        api.getCurrentUser("Bearer " + accessToken)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, Response<User> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            User serverUser = response.body();
+                            // Обновляем DTO
+                            userDTO.setUsername(serverUser.getUsername());
+                            userDTO.setEmail(serverUser.getEmail());
+                            userDTO.setBio(serverUser.getBio());
+                            userDTO.setNickname(serverUser.getNickname());
+                            userDTO.setProfilePicture(serverUser.getProfilePicture());
                             // Обновляем UI
                             name.setText(userDTO.getUsername());
                             setUserAvatar();
+                        } else {
+                            try {
+                                String errorBody = response.errorBody() != null
+                                        ? response.errorBody().string()
+                                        : "null";
+                                Log.e("Profile", "Ошибка загрузки профиля. Code="
+                                        + response.code()
+                                        + " message=" + response.message()
+                                        + " errorBody=" + errorBody);
+                            } catch (IOException e) {
+                                Log.e("Profile", "Ошибка чтения errorBody", e);
+                            }
+                            Toast.makeText(Profile.this,
+                                    "Не удалось загрузить профиль: code=" + response.code(),
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
-                }
-        );
 
-        // Заполняем UI
-        name.setText(userDTO.getUsername());
-        setUserAvatar();
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        Log.e("Profile", "Сетевая ошибка при загрузке профиля", t);
+                        Toast.makeText(Profile.this,
+                                "Ошибка сети: " + t.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+
         fillUserConcerts();
 
         // Обработчик меню
@@ -183,12 +228,15 @@ public class Profile extends AppCompatActivity {
         UtilFeed.FillFeedConcert(this, concerts);
     }
 
-    public void OnClickFriends(View view) {}
+    public void OnClickFriends(View view) {
+    }
+
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
     }
+
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -199,6 +247,10 @@ public class Profile extends AppCompatActivity {
         intent.putExtra("profilePicture", userDTO.getProfilePicture());
         startActivity(intent);
     }
-    public void OnClickSocialNetworks(View view) {}
-    public void OnClickProfileSettings(View view) {}
+
+    public void OnClickSocialNetworks(View view) {
+    }
+
+    public void OnClickProfileSettings(View view) {
+    }
 }

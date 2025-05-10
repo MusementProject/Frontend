@@ -36,6 +36,9 @@ public class ProfileSettings extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
         setContentView(R.layout.activity_profile_settings);
         UtilButtons.Init(this);
         avatarView = findViewById(R.id.ivAvatar);
