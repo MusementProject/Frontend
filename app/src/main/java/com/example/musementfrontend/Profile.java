@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dialogs.FriendsDialogFragment;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
@@ -265,7 +266,13 @@ public class Profile extends AppCompatActivity {
     }
 
     public void OnClickFriends(View view) {
+        FriendsDialogFragment dialog = new FriendsDialogFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(IntentKeys.getUSER_KEY(), user);
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(), "friends");
     }
+
 
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);

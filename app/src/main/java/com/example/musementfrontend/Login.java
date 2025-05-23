@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -40,14 +41,14 @@ public class Login extends AppCompatActivity {
     private GoogleSignInOptions googleSignInOptions;
     private GoogleSignInClient googleSignInClient;
     private SignInButton googleSignInButton;
-    public ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
+    public  ActivityResultLauncher<Intent> googleSignInResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
                     Intent data = result.getData();
                     Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                     try {
                         task.getResult(ApiException.class);
+                        finish();
                         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
                         if (googleSignInAccount != null) {
                             sendInfo(googleSignInAccount);
@@ -59,9 +60,11 @@ public class Login extends AppCompatActivity {
                 }
             });
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         Util.setIcon(this);
         initLoginField();
@@ -153,7 +156,8 @@ public class Login extends AppCompatActivity {
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
         if (loginField.getText().toString().isBlank() || passwordField.getText().toString().isBlank()) {
-            Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG).show();
+            Toast toast = Toast.makeText(this, "Incorrect registration data", Toast.LENGTH_LONG);
+            toast.show();
             return false;
         }
         return true;
@@ -163,7 +167,6 @@ public class Login extends AppCompatActivity {
         Intent intent = new Intent(this, Registration.class);
         startActivity(intent);
     }
-
     private void sendInfo(GoogleSignInAccount googleAccount) {
         String accessToken = googleAccount.getIdToken();
         if (accessToken != null) {

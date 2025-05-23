@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseLoginDTO {
+public class FriendDTO {
     private Long id;
     private String username;
-    private String email;
     private String nickname;
-    private String token;
+    private String profilePicture;
+    private boolean accepted;
 }
