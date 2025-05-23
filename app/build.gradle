@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:20.0.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation("androidx.fragment:fragment:1.8.5")
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
