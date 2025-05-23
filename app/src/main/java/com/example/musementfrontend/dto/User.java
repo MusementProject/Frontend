@@ -78,4 +78,8 @@ public class User implements Parcelable {
         dest.writeString(telegram);
         dest.writeString(accessToken);
     }
+
+    public User(UserDTO userDTO){
+
+    }
 }

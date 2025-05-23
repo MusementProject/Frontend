@@ -16,10 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.util.GoogleConfig;
+import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.Util;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -182,6 +184,12 @@ public class Login extends AppCompatActivity {
                         }
                         // Switch to Profile activity, passing UserDTO data
                         Intent intent = getIntent(result, jwt);
+                        User user = new User();
+                        user.setId(result.getId());
+                        user.setEmail(result.getEmail());
+                        user.setUsername(result.getUsername());
+                        user.setAccessToken(jwt);
+                        intent.putExtra(IntentKeys.getUSER_KEY(), user);
                         startActivity(intent);
                         finish();
                     } else {

@@ -26,6 +26,7 @@ import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
+import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.UtilButtons;
 import com.example.musementfrontend.util.UtilFeed;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Profile extends AppCompatActivity {
+    private User user;
     private UserDTO userDTO;
     private APIService api;
     private TextView username;
@@ -53,6 +55,11 @@ public class Profile extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         UtilButtons.Init(this);
+        Bundle arguments = getIntent().getExtras();
+        user = null;
+        if (arguments != null) {
+            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+        }
 
         profileSettingsLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -182,6 +189,8 @@ public class Profile extends AppCompatActivity {
             });
             menu.show();
         });
+
+        Log.d("token", accessToken);
     }
 
     @NonNull
@@ -272,6 +281,7 @@ public class Profile extends AppCompatActivity {
         intent.putExtra("bio", userDTO.getBio());
         intent.putExtra("nickname", userDTO.getNickname());
         intent.putExtra("profilePicture", userDTO.getProfilePicture());
+        UtilButtons.fillIntent(intent, user);
         startActivity(intent);
     }
 
