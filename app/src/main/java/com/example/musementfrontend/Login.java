@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
@@ -21,6 +22,7 @@ import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.util.GoogleConfig;
+import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.Util;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -98,30 +100,58 @@ public class Login extends AppCompatActivity {
     public void onClickSignInButton(View view) {
         EditText usernameField = Util.getCustomEditViewById(this, R.id.username);
         EditText passwordField = Util.getCustomEditViewById(this, R.id.password);
-//        if (isValidLoginData(usernameField, passwordField)) {
-//            UserRequestLoginDTO userLogin = new UserRequestLoginDTO(usernameField.getText().toString(), passwordField.getText().toString());
-//            APIService apiService = APIClient.getClient().create(APIService.class);
-//            Call<UserResponseLoginDTO> call = apiService.userLogin(userLogin);
-//            call.enqueue(new Callback<UserResponseLoginDTO>() {
-//                @Override
-//                public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
-//                    if (response.isSuccessful()) {
-//                        Intent intent = new Intent(Login.this, Feed.class);
-//                        startActivity(intent);
-//                        finish();
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
-//                    Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-//                    toast.show();
-//                }
-//            });
-//        }
-        Intent intent = new Intent(Login.this, Feed.class);
-        startActivity(intent);
-        finish();
+        if (!isValidLoginData(usernameField, passwordField)) return;
+
+        UserRequestLoginDTO userLogin = new UserRequestLoginDTO(
+                usernameField.getText().toString().trim(),
+                passwordField.getText().toString().trim()
+        );
+
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        apiService.userLogin(userLogin).enqueue(new Callback<UserResponseLoginDTO>() {
+            @Override
+            public void onResponse(
+                    @NonNull Call<UserResponseLoginDTO> call,
+                    @NonNull Response<UserResponseLoginDTO> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(Login.this,
+                            "Error: " + response.code() + " " + response.message(),
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                UserResponseLoginDTO dto = response.body();
+                String jwt = dto.getToken();
+                if (jwt == null || jwt.isEmpty()) {
+                    Toast.makeText(Login.this,
+                            "Error: token is null or empty",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Switch to Profile activity, passing UserDTO data
+                Intent intent = Login.this.getIntent(dto, jwt);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<UserResponseLoginDTO> call, @NonNull Throwable t) {
+                Toast.makeText(Login.this,
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @NonNull
+    private Intent getIntent(UserResponseLoginDTO dto, String jwt) {
+        Intent intent = new Intent(Login.this, Profile.class);
+        intent.putExtra("username", dto.getUsername());
+        intent.putExtra("email", dto.getEmail());
+        intent.putExtra("accessToken", jwt);
+        intent.putExtra("userId", dto.getId());
+        return intent;
     }
 
     private boolean isValidLoginData(EditText loginField, EditText passwordField) {
@@ -137,38 +167,44 @@ public class Login extends AppCompatActivity {
         Intent intent = new Intent(this, Registration.class);
         startActivity(intent);
     }
-
-    private void sendInfo(GoogleSignInAccount googleAccout){
-        String accessToken = googleAccout.getIdToken();
-        if (accessToken != null){
+    private void sendInfo(GoogleSignInAccount googleAccount) {
+        String accessToken = googleAccount.getIdToken();
+        if (accessToken != null) {
             APIService apiService = APIClient.getClient().create(APIService.class);
             UserRequestLoginWithGoogle userRequest = new UserRequestLoginWithGoogle(accessToken);
-            Call<UserResponseLoginDTO> call = apiService.userLoginWithGoogle(userRequest);
-            call.enqueue(new Callback<UserResponseLoginDTO>() {
+            apiService.userLoginWithGoogle(userRequest).enqueue(new Callback<UserResponseLoginDTO>() {
                 @Override
-                public void onResponse(Call<UserResponseLoginDTO> call, Response<UserResponseLoginDTO> response) {
-                    if (response.isSuccessful()){
+                public void onResponse(@NonNull Call<UserResponseLoginDTO> call,
+                                       @NonNull Response<UserResponseLoginDTO> response) {
+                    if (response.isSuccessful() && response.body() != null) {
                         UserResponseLoginDTO result = response.body();
-                        Log.d("token", accessToken);
-                        if (result != null) {
-                            User user = new User();
-                            user.setId(result.getId());
-                            user.setEmail(result.getEmail());
-                            user.setUsername(result.getUsername());
-                            user.setNickname(result.getNickname());
-                            user.setAccessToken(accessToken);
-                            Log.d("token", accessToken);
-                            Intent intent = new Intent(Login.this, Feed.class);
-                            intent.putExtra("user", user);
-                            startActivity(intent);
+                        String jwt = result.getToken();
+                        if (jwt == null || jwt.isEmpty()) {
+                            Toast.makeText(Login.this,
+                                    "Error: token is null or empty",
+                                    Toast.LENGTH_LONG).show();
+                            return;
                         }
+                        // Switch to Profile activity, passing UserDTO data
+                        Intent intent = getIntent(result, jwt);
+                        User user = new User();
+                        user.setId(result.getId());
+                        user.setEmail(result.getEmail());
+                        user.setUsername(result.getUsername());
+                        user.setAccessToken(jwt);
+                        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(Login.this,
+                                "Error during Google login: " + response.code() + " " + response.message(),
+                                Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<UserResponseLoginDTO> call, Throwable t) {
-                    Toast toast = Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG);
-                    toast.show();
+                public void onFailure(@NonNull Call<UserResponseLoginDTO> call, @NonNull Throwable t) {
+                    Toast.makeText(Login.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         }

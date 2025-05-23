@@ -42,7 +42,6 @@ public class Playlists extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlists);
         UtilButtons.Init(this);
         FillPlaylists(this, null);
@@ -117,14 +116,14 @@ public class Playlists extends AppCompatActivity {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Bundle arguments = getIntent().getExtras();
 
-        User user;
+        User user = null;
         if (arguments != null) {
             user = (User) arguments.get(IntentKeys.getUSER_KEY());
-        } else {
-
-            user = null;
         }
+
+        Log.d("token playlists", user.getAccessToken());
         if (user != null) {
+            Log.d("userToken", user.getAccessToken());
             SpotifyPlaylistRequest request = new SpotifyPlaylistRequest(user.getId(), playlistId, playlistTitle);
             Call<List<PlaylistInfo>> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
             call.enqueue(new Callback<List<PlaylistInfo>>() {

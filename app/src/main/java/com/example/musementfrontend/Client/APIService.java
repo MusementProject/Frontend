@@ -1,8 +1,10 @@
 package com.example.musementfrontend.Client;
 
 import com.example.musementfrontend.dto.FriendDTO;
+import com.example.musementfrontend.dto.ImageResponseDTO;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
 import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
@@ -14,12 +16,15 @@ import com.example.musementfrontend.pojo.PlaylistInfo;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 
 public interface APIService {
@@ -35,7 +40,10 @@ public interface APIService {
 
     @POST("/api/playlists/add")
     Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
-    
+
+    @POST("/api/playlists/add")
+    Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
+
     @PATCH("/api/users/{id}")
     Call<UserUpdateDTO> updateUser(@Header("Authorization") String authHeader, @Path("id") long id, @Body UserUpdateDTO request);
 
@@ -51,4 +59,20 @@ public interface APIService {
     @GET("/api/friends/getFollowers/{userId}")
     Call<List<FriendDTO>> getAllUserFollowers(@Header("Authorization") String authHeader, @Path("userId") long id);
 
+    @PATCH("/api/users/{id}")
+    Call<User> updateUser(
+            @Header("Authorization") String auth,
+            @Path("id") String id,
+            @Body UserDTO dto
+    );
+
+    @Multipart
+    @POST("/api/media/upload")
+    Call<ImageResponseDTO> uploadMedia(
+            @Header("Authorization") String authHeader,
+            @Part MultipartBody.Part file
+    );
+
+    @GET("/api/users/me")
+    Call<User> getCurrentUser(@Header("Authorization") String auth);
 }

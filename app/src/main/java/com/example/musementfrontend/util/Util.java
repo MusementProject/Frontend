@@ -25,6 +25,7 @@ public class Util {
         return PROFILE_PHOTO_DEFAULT;
     }
 
+
     static public void setIcon(AppCompatActivity activity){
         ImageView imageView = activity.findViewById(R.id.musement_icon);
 
