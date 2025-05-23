@@ -11,12 +11,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserUpdateDTO {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public class UserDTO {
-        private String username;
-        private String email;
-        private String bio;
-        private String nickname;
-        private String profilePicture;
-    }
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UserDTO {
+    private String username;
+    private String email;
+    private String bio;
+    private String nickname;
+    private String profilePicture;
+}

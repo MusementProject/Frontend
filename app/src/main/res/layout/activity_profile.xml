@@ -45,6 +45,15 @@
             android:layout_marginTop="10dp"
             android:layout_gravity="center_horizontal"/>
 
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="\@nickname"
+            android:textColor="@color/white"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"/>
+
         <LinearLayout
             android:id="@+id/userInfo"
             android:layout_marginTop="30dp"

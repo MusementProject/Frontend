@@ -3,14 +3,13 @@ package com.example.musementfrontend.Client;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.ImageResponseDTO;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
-import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.User;
+import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.UserRequestLoginDTO;
 import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
-import com.example.musementfrontend.dto.UserUpdateDTO;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.pojo.PlaylistInfo;
 
@@ -41,11 +40,8 @@ public interface APIService {
     @POST("/api/playlists/add")
     Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
 
-    @POST("/api/playlists/add")
-    Call<List<PlaylistInfo>> addPlaylist(@Header("Authorization") String authHeader, @Body SpotifyPlaylistRequest request);
-
     @PATCH("/api/users/{id}")
-    Call<UserUpdateDTO> updateUser(@Header("Authorization") String authHeader, @Path("id") long id, @Body UserUpdateDTO request);
+    Call<UserDTO> updateUser(@Header("Authorization") String authHeader, @Path("id") long id, @Body UserDTO request);
 
     @GET("/api/concerts/attend_user/{userId}")
     Call<List<Concert>> getUserConcerts(@Header("Authorization") String authHeader, long id);
