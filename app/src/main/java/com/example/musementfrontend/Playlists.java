@@ -14,7 +14,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -22,15 +21,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
-import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Playlist;
 import com.example.musementfrontend.pojo.PlaylistInfo;
 import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.UtilButtons;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -118,7 +114,7 @@ public class Playlists extends AppCompatActivity {
 
         User user = null;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         }
 
         Log.d("token playlists", user.getAccessToken());

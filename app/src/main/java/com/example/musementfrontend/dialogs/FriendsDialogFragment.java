@@ -2,6 +2,7 @@ package com.example.musementfrontend.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.Friend;
+import com.example.musementfrontend.Login;
+import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.User;
@@ -46,14 +50,19 @@ public class FriendsDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
         if (args != null){
-            this.user = args.getParcelable(IntentKeys.getUSER_KEY(), User.class);
+            this.user = args.getParcelable(IntentKeys.getUSER(), User.class);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_friends, null);
         RecyclerView recyclerView = view.findViewById(R.id.friendsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FriendsAdapter(friends);
+        adapter = new FriendsAdapter(friends, friend -> {
+            Intent intent = new Intent(requireContext(), Friend.class);
+            intent.putExtra(IntentKeys.getUSER(), user);
+            intent.putExtra(IntentKeys.getFRIEND_USERNAME(), friend.getUsername());
+            startActivity(intent);
+        });
         recyclerView.setAdapter(adapter);
 
         AlertDialog dialog = builder

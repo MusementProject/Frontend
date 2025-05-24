@@ -59,7 +59,7 @@ public class Profile extends AppCompatActivity {
         Bundle arguments = getIntent().getExtras();
         user = null;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         }
 
         profileSettingsLauncher = registerForActivityResult(
@@ -268,7 +268,7 @@ public class Profile extends AppCompatActivity {
     public void OnClickFriends(View view) {
         FriendsDialogFragment dialog = new FriendsDialogFragment();
         Bundle args = new Bundle();
-        args.putParcelable(IntentKeys.getUSER_KEY(), user);
+        args.putParcelable(IntentKeys.getUSER(), user);
         dialog.setArguments(args);
         dialog.show(getSupportFragmentManager(), "friends");
     }

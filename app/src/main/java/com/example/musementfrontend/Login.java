@@ -192,7 +192,7 @@ public class Login extends AppCompatActivity {
                         user.setEmail(result.getEmail());
                         user.setUsername(result.getUsername());
                         user.setAccessToken(jwt);
-                        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+                        intent.putExtra(IntentKeys.getUSER(), user);
                         startActivity(intent);
                         finish();
                     } else {

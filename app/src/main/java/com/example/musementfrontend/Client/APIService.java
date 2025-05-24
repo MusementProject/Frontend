@@ -71,4 +71,7 @@ public interface APIService {
 
     @GET("/api/users/me")
     Call<User> getCurrentUser(@Header("Authorization") String auth);
+
+    @GET("/api/users/username/{username}")
+    Call<User> getUserByUsername(@Header("Authorization") String authHeader, @Path("username") String username);
 }
