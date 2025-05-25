@@ -26,6 +26,7 @@ import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface APIService {
 
@@ -56,7 +57,7 @@ public interface APIService {
     @GET("/api/friends/getFollowers/{userId}")
     Call<List<FriendDTO>> getAllUserFollowers(@Header("Authorization") String authHeader, @Path("userId") long id);
 
-    @PATCH("/api/users/{id}")
+    @PATCH("/api/users/id/{id}")
     Call<User> updateUser(
             @Header("Authorization") String auth,
             @Path("id") String id,
@@ -84,4 +85,7 @@ public interface APIService {
 
     @DELETE("/api/friends/delete/{userId}/{friendId}")
     Call<Boolean> deleteFriend(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
+
+    @GET("/api/users/searchByUsername")
+    Call<List<FriendDTO>> searchByUsername(@Header("Authorization") String authHeader, @Query("q") String query);
 }
