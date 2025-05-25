@@ -18,6 +18,7 @@ import java.util.List;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
@@ -74,4 +75,13 @@ public interface APIService {
 
     @GET("/api/users/username/{username}")
     Call<User> getUserByUsername(@Header("Authorization") String authHeader, @Path("username") String username);
+
+    @GET("/api/friends/get/{userId}/{friendId}")
+    Call<Boolean> getFriendshipInfo(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
+
+    @POST("/api/friends/add/{userId}/{friendId}")
+    Call<FriendDTO> addFriend(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
+
+    @DELETE("/api/friends/delete/{userId}/{friendId}")
+    Call<Boolean> deleteFriend(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
 }

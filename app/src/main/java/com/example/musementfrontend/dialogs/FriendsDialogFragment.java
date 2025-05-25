@@ -38,9 +38,9 @@ public class FriendsDialogFragment extends DialogFragment {
     private List<FriendDTO> friends = new ArrayList<>();
     private User user;
 
-    public void setFriends(List<FriendDTO> friends){
+    public void setFriends(List<FriendDTO> friends) {
         this.friends = friends;
-        if (adapter != null){
+        if (adapter != null) {
             adapter.updateFriends(friends);
         }
     }
@@ -49,7 +49,7 @@ public class FriendsDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
-        if (args != null){
+        if (args != null) {
             this.user = args.getParcelable(IntentKeys.getUSER(), User.class);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -58,6 +58,7 @@ public class FriendsDialogFragment extends DialogFragment {
         RecyclerView recyclerView = view.findViewById(R.id.friendsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new FriendsAdapter(friends, friend -> {
+            dismiss();
             Intent intent = new Intent(requireContext(), Friend.class);
             intent.putExtra(IntentKeys.getUSER(), user);
             intent.putExtra(IntentKeys.getFRIEND_USERNAME(), friend.getUsername());
@@ -90,14 +91,14 @@ public class FriendsDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    public void OnClickFriendsButton(View view){
+    public void OnClickFriendsButton(View view) {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Call<List<FriendDTO>> call = apiService.getAllUserFriends("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<FriendDTO>>() {
             @Override
             public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FriendDTO> friendList = response.body();
                     setFriends(friendList);
                 }
             }
@@ -109,14 +110,14 @@ public class FriendsDialogFragment extends DialogFragment {
         });
     }
 
-    public void OnClickFollowersButton(View view){
+    public void OnClickFollowersButton(View view) {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Call<List<FriendDTO>> call = apiService.getAllUserFollowers("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<FriendDTO>>() {
             @Override
             public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FriendDTO> friendList = response.body();
                     setFriends(friendList);
                 }
             }
@@ -128,14 +129,14 @@ public class FriendsDialogFragment extends DialogFragment {
         });
     }
 
-    public void OnClickFollowingButton(View view){
+    public void OnClickFollowingButton(View view) {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Call<List<FriendDTO>> call = apiService.getAllUserFollowing("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<FriendDTO>>() {
             @Override
             public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FriendDTO> friendList = response.body();
                     setFriends(friendList);
                 }
             }
