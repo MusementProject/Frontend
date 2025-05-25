@@ -3,4 +3,10 @@
     <string name="change_profile_picture">Change profile picture</string>
     <string name="username_handle">\@%1$s</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Превью билета для доступности -->
+    <string name="ticket_preview">Превью билета</string>
+    <!-- Описания кнопок -->
+    <string name="replace_ticket">Заменить билет</string>
+    <string name="delete_ticket">Удалить билет</string>
 </resources>
