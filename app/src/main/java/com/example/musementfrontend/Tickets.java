@@ -76,6 +76,22 @@ public class Tickets extends AppCompatActivity
         loadTickets();
     }
 
+    private void performReplace(MultipartBody.Part part, Ticket ticket) {
+        api.replaceTicket(token, ticket.getId(), part)
+                .enqueue(new Callback<Ticket>() {
+                    @Override
+                    public void onResponse(Call<Ticket> call, Response<Ticket> response) {
+                        if (response.isSuccessful()) {
+                            loadTickets();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Ticket> call, Throwable t) {
+                        Toast.makeText(Tickets.this, "Replace failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void loadTickets() {
         api.getTickets(token).enqueue(new Callback<List<Ticket>>() {
             @Override public void onResponse(Call<List<Ticket>> c,

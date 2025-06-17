@@ -91,4 +91,7 @@ public interface APIService {
             @Path("id") long ticketId,
             @Part MultipartBody.Part file
     );
+
+    @GET("/api/concerts/attend_user")
+    Call<List<Concert>> getUserConcerts();
 }

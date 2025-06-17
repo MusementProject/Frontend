@@ -19,15 +19,16 @@ import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.pojo.Concert;
-import com.example.musementfrontend.pojo.Ticket;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
+
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okio.BufferedSink;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -83,22 +84,25 @@ public class UploadTicketDialogFragment extends DialogFragment {
         btnUpload.setOnClickListener(v -> {
             Concert sel = (Concert) spinnerConcerts.getSelectedItem();
             long concertId = sel.getId_concert();
-            try {
-                InputStream in = requireContext().getContentResolver()
-                        .openInputStream(pickedUri);
-                byte[] data = new byte[in.available()];
-                in.read(data);
-                RequestBody rb = RequestBody.create(data,
-                        MediaType.parse(requireContext()
-                                .getContentResolver()
-                                .getType(pickedUri)));
-                MultipartBody.Part part = MultipartBody.Part
-                        .createFormData("file", "ticket",
-                                rb);
-                listener.onUpload(concertId, part);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            RequestBody rb = new RequestBody() {
+                @Override
+                public MediaType contentType() {
+                    return MediaType.parse(Objects.requireNonNull(requireContext().getContentResolver().getType(pickedUri)));
+                }
+
+                @Override
+                public void writeTo(@NonNull BufferedSink sink) throws IOException {
+                    try (InputStream in = requireContext().getContentResolver().openInputStream(pickedUri)) {
+                        byte[] buffer = new byte[8192];
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            sink.write(buffer, 0, read);
+                        }
+                    }
+                }
+            };
+            MultipartBody.Part part = MultipartBody.Part.createFormData("file", "ticket", rb);
+            listener.onUpload(concertId, part);
             dismiss();
         });
 
@@ -110,6 +114,9 @@ public class UploadTicketDialogFragment extends DialogFragment {
     private void loadConcerts() {
         // TODO: заменить на реальное API
         APIService api = APIClient.getClient().create(APIService.class);
+        String token = "Bearer " + requireContext().getSharedPreferences("prefs", Context.MODE_PRIVATE)
+                .getString("accessToken", "");
+
         api.getUserConcerts() // вызываем эндпоинт для списка концертов
                 .enqueue(new Callback<List<Concert>>() {
                     @Override public void onResponse(Call<List<Concert>> c,
