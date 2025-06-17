@@ -26,6 +26,7 @@ import com.bumptech.glide.Glide;
 import com.example.musementfrontend.util.UtilButtons;
 
 import android.widget.ImageView;
+import android.widget.ImageButton;
 
 
 public class PlaylistStatistics extends AppCompatActivity {
@@ -78,6 +79,8 @@ public class PlaylistStatistics extends AppCompatActivity {
 
             if (index < 3) {
                 artistItem.setBackgroundResource(R.drawable.rounded_green);
+            } else {
+                artistItem.setBackgroundResource(R.drawable.rounded_light_gray);
             }
             index++;
 
@@ -87,5 +90,16 @@ public class PlaylistStatistics extends AppCompatActivity {
             artistItem.setLayoutParams(params);
             feedLayout.addView(artistItem);
         }
+
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PlaylistStatistics.this, Playlists.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 }

@@ -13,5 +13,5 @@ public class PlaylistInfo {
     private Long userId;
     private Long artistId;
     private Artist artist;
-    private Long counter;
+    private Long count;
 }

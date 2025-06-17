@@ -4,16 +4,18 @@
     android:id="@+id/artist_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/rounded_light_orange"
+    android:background="@drawable/rounded_light_gray"
     android:padding="8dp"
-    android:clipToOutline="true">
+    android:clipToOutline="true"
+    android:elevation="4dp">
 
     <LinearLayout
         android:id="@+id/artist_layout"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:foreground="?attr/selectableItemBackground">
 
         <ImageView
             android:id="@+id/artist_photo"
