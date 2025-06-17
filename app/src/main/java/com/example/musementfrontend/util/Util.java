@@ -19,6 +19,13 @@ public class Util {
 
     private static final String ICON_FILENAME = "musement_icon.png";
 
+    private static final String PROFILE_PHOTO_DEFAULT = "https://zefirka.club/uploads/posts/2023-01/1673278260_2-zefirka-club-p-serii-chelovek-na-avu-2.png";
+
+    public static String getProfilePhotoDefault(){
+        return PROFILE_PHOTO_DEFAULT;
+    }
+
+
     static public void setIcon(AppCompatActivity activity){
         ImageView imageView = activity.findViewById(R.id.musement_icon);
 

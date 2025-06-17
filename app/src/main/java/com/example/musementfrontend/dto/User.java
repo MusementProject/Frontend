@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,13 +16,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements Parcelable {
     private Long id;
     private String googleId;
     private String username;
     private String nickname;
     private String email;
-    private String photoUrl;
+    private String profilePicture;
     private String bio;
     private String telegram;
     private String accessToken;
@@ -35,7 +38,7 @@ public class User implements Parcelable {
         username = in.readString();
         nickname = in.readString();
         email = in.readString();
-        photoUrl = in.readString();
+        profilePicture = in.readString();
         bio = in.readString();
         telegram = in.readString();
         accessToken = in.readString();
@@ -70,9 +73,13 @@ public class User implements Parcelable {
         dest.writeString(username);
         dest.writeString(nickname);
         dest.writeString(email);
-        dest.writeString(photoUrl);
+        dest.writeString(profilePicture);
         dest.writeString(bio);
         dest.writeString(telegram);
         dest.writeString(accessToken);
+    }
+
+    public User(UserDTO userDTO){
+
     }
 }

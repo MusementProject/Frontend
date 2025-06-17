@@ -2,7 +2,7 @@ package com.example.musementfrontend;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -11,13 +11,16 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dialogs.FriendsDialogFragment;
+import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.IntentKeys;
@@ -28,90 +31,220 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import android.util.Log;
 
 public class Profile extends AppCompatActivity {
+    private User user;
+    private UserDTO userDTO;
+    private APIService api;
+    private TextView username;
+    private TextView nickname;
+    private ImageView avatar;
+    private ActivityResultLauncher<Intent> profileSettingsLauncher;
+    private String accessToken;
+    private long userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
-
         UtilButtons.Init(this);
+        Bundle arguments = getIntent().getExtras();
+        user = null;
+        if (arguments != null) {
+            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+        }
+
+        profileSettingsLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+
+                        // fields that can be changed by the user
+                        String newUsername = data.getStringExtra("username");
+                        String newBio = data.getStringExtra("bio");
+                        String newNick = data.getStringExtra("nickname");
+                        String newAvatar = data.getStringExtra("profilePicture");
+
+                        // update userDTO
+                        userDTO.setUsername(newUsername);
+                        userDTO.setBio(newBio);
+                        userDTO.setNickname(newNick);
+                        userDTO.setProfilePicture(newAvatar);
+
+                        // update UI
+                        username.setText(
+                                getString(R.string.username_handle, userDTO.getUsername())
+                        );
+                        nickname.setText(newNick);
+                        setUserAvatar();
+                    }
+                }
+        );
+
+        // 1) init API + get token + userId
+        api = APIClient.getClient().create(APIService.class);
+        Intent intent = getIntent();
+        accessToken = intent.getStringExtra("accessToken");
+        userId = intent.getLongExtra("userId", 0L);
+
+        // 2) prepare UserDTO from intent
+        userDTO = new UserDTO(
+                intent.getStringExtra("username"),
+                intent.getStringExtra("email"),
+                intent.getStringExtra("bio"),
+                intent.getStringExtra("nickname"),
+                null
+        );
+
+        // 3) find views and set data
+        username = findViewById(R.id.username);
+        nickname = findViewById(R.id.nickname);
+        avatar = findViewById(R.id.avatar);
+        ImageButton settings = findViewById(R.id.settings);
+
+        username.setText(
+                getString(R.string.username_handle, userDTO.getUsername())
+        );
+        nickname.setText(userDTO.getNickname());
         setUserAvatar();
 
-        User user = Util.getUser(getIntent());
-        if (user != null) {
-            TextView name = findViewById(R.id.name);
-            name.setText(user.getUsername());
-        }
-        ImageButton settings = findViewById(R.id.settings);
+        // 4) load fresh user data from server
+        api.getCurrentUser("Bearer " + accessToken)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            User serverUser = response.body();
+
+                            // update userDTO from server
+                            userDTO.setUsername(serverUser.getUsername());
+                            userDTO.setEmail(serverUser.getEmail());
+                            userDTO.setBio(serverUser.getBio());
+                            userDTO.setNickname(serverUser.getNickname());
+                            userDTO.setProfilePicture(serverUser.getProfilePicture());
+
+                            // update UI
+                            username.setText(
+                                    getString(R.string.username_handle, userDTO.getUsername())
+                            );
+                            nickname.setText(userDTO.getNickname());
+                            setUserAvatar();
+                        } else {
+                            try {
+                                String errorBody = response.errorBody() != null
+                                        ? response.errorBody().string()
+                                        : "null";
+                                Log.e("Profile", "Error loading user data: code="
+                                        + response.code()
+                                        + " message=" + response.message()
+                                        + " errorBody=" + errorBody);
+                            } catch (IOException e) {
+                                Log.e("Profile", "Error reading error body", e);
+                            }
+                            Toast.makeText(Profile.this,
+                                    "Error loading profile: " + response.code(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                        Log.e("Profile", "Error during network request", t);
+                        Toast.makeText(Profile.this,
+                                "Network error: " + t.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+
+        // set up menu buttons
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
             MenuInflater inflater = menu.getMenuInflater();
             inflater.inflate(R.menu.menu, menu.getMenu());
             menu.setOnMenuItemClickListener(item -> {
                 int itemId = item.getItemId();
-                if (itemId == R.id.profile_settings){
-                    Intent intent = new Intent(Profile.this, ProfileSettings.class);
-                    intent.putExtra(IntentKeys.getUSER_KEY(), user);
-                    startActivity(intent);
+                if (itemId == R.id.profile_settings) {
+                    Intent intentSettings = getIntentSettings();
+                    profileSettingsLauncher.launch(intentSettings);
                     return true;
                 }
-                if (itemId == R.id.log_out){
+                if (itemId == R.id.log_out) {
                     logOut();
                     return true;
                 }
-                return true;
+                return false;
             });
             menu.show();
         });
+
+        Log.d("token", accessToken);
+    }
+
+    @NonNull
+    private Intent getIntentSettings() {
+        Intent intentSettings = new Intent(Profile.this, ProfileSettings.class);
+        intentSettings.putExtra("username", userDTO.getUsername());
+        intentSettings.putExtra("email", userDTO.getEmail());
+        intentSettings.putExtra("bio", userDTO.getBio());
+        intentSettings.putExtra("nickname", userDTO.getNickname());
+        intentSettings.putExtra("profilePicture", userDTO.getProfilePicture());
+        intentSettings.putExtra("accessToken", accessToken);
+        intentSettings.putExtra("userId", userId);
+        return intentSettings;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // update UI with user data
+        if (userDTO != null) {
+            username.setText(
+                    getString(R.string.username_handle, userDTO.getUsername())
+            );
+            nickname.setText(userDTO.getNickname());
+            setUserAvatar();
+        }
+
+        // Load concerts when activity resumes
         loadAttendingConcerts();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    private void logOut(){
-        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-        GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
-        GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if (googleSignInAccount != null){
-            googleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    finish();
-                    Intent intent = new Intent(Profile.this, Login.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            });
+    private void setUserAvatar() {
+        String url = userDTO.getProfilePicture();
+        if (url != null && !url.isEmpty()) {
+            Glide.with(this)
+                    .load(url)
+                    .circleCrop()
+                    .into(avatar);
+        } else {
+            Glide.with(this)
+                    .load(R.drawable.default_avatar)
+                    .circleCrop()
+                    .into(avatar);
         }
     }
 
-    private void setUserAvatar() {
-        ImageView avatar = findViewById(R.id.avatar);
-        Glide.with(this)
-                .load("https://zefirka.club/uploads/posts/2023-01/1673278260_2-zefirka-club-p-serii-chelovek-na-avu-2.png")
-                .circleCrop()
-                .into(avatar);
+    private void logOut() {
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+        GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
+        GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if (googleSignInAccount != null) {
+            googleSignInClient.signOut().addOnCompleteListener(task -> {
+                finish();
+                Intent intent = new Intent(Profile.this, Login.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            });
+        }
     }
 
     private void showLoading(String message) {
@@ -148,19 +281,32 @@ public class Profile extends AppCompatActivity {
         });
     }
 
-    public void OnClickFriends(View view) {}
+    public void OnClickFriends(View view) {
+        FriendsDialogFragment dialog = new FriendsDialogFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(IntentKeys.getUSER_KEY(), user);
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(), "friends");
+    }
+
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
     }
+
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        User user = Util.getUser(getIntent());
-        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        intent.putExtra("username", userDTO.getUsername());
+        intent.putExtra("email", userDTO.getEmail());
+        intent.putExtra("bio", userDTO.getBio());
+        intent.putExtra("nickname", userDTO.getNickname());
+        intent.putExtra("profilePicture", userDTO.getProfilePicture());
+        UtilButtons.fillIntent(intent, user);
         startActivity(intent);
     }
+
     public void OnClickSocialNetworks(View view) {}
     public void OnClickProfileSettings(View view) {}
 }

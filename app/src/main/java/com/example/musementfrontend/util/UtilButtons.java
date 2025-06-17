@@ -84,6 +84,7 @@ public class UtilButtons {
         Intent intent = new Intent(context, Feed.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         fillIntent(intent, user);
+        intent.putExtra("accessToken", user.getAccessToken());
         context.startActivity(intent);
     }
 
@@ -120,7 +121,7 @@ public class UtilButtons {
         context.startActivity(intent);
     }
 
-    static private void fillIntent(Intent intent, User user){
+    public static void fillIntent(Intent intent, User user){
         if (user != null){
             intent.putExtra(IntentKeys.getUSER_KEY(), user);
         }
