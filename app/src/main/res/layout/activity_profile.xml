@@ -91,6 +91,20 @@
                 android:onClick="OnClickSocialNetworks"/>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading concerts..."
+            android:textColor="@color/light_blue"
+            android:textSize="20sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/header"
+            app:layout_constraintBottom_toTopOf="@id/main_menu"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.1"/>
+
         <ScrollView
             android:id="@+id/scroll"
             android:layout_width="320dp"

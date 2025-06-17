@@ -9,12 +9,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.musementfrontend.Client.APIClient;
+import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.IntentKeys;
@@ -28,15 +31,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import android.util.Log;
+
 public class Profile extends AppCompatActivity {
-
-    User user;
-    Bundle arguments;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +48,6 @@ public class Profile extends AppCompatActivity {
 
         UtilButtons.Init(this);
         setUserAvatar();
-
-        fillUserConcerts();
 
         User user = Util.getUser(getIntent());
         if (user != null) {
@@ -78,6 +78,12 @@ public class Profile extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadAttendingConcerts();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
@@ -101,7 +107,6 @@ public class Profile extends AppCompatActivity {
     }
 
     private void setUserAvatar() {
-        // get info about user avatar
         ImageView avatar = findViewById(R.id.avatar);
         Glide.with(this)
                 .load("https://zefirka.club/uploads/posts/2023-01/1673278260_2-zefirka-club-p-serii-chelovek-na-avu-2.png")
@@ -109,25 +114,46 @@ public class Profile extends AppCompatActivity {
                 .into(avatar);
     }
 
-    private void fillUserConcerts() {
-        // get user concerts from database!!
-        List<Concert> concerts = new ArrayList<>();
-        for (int i = 0; i < 20; ++i) {
-            concerts.add(new Concert(1, 1, "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2", new Date(1000)));
-        }
-        UtilFeed.FillFeedConcert(this, concerts);
+    private void showLoading(String message) {
+        TextView loadingText = findViewById(R.id.loading_text);
+        loadingText.setText(message);
+        loadingText.setVisibility(View.VISIBLE);
     }
 
-    public void OnClickFriends(View view) {
-        // new fragment with friends
+    private void hideLoading() {
+        TextView loadingText = findViewById(R.id.loading_text);
+        loadingText.setVisibility(View.GONE);
     }
 
+    private void loadAttendingConcerts() {
+        // showLoading("Loading concerts...");
+        User user = Util.getUser(getIntent());
+        if (user == null) return;
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<Concert>>() {
+            @Override
+            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UtilFeed.FillProfileConcerts(Profile.this, response.body());
+                    hideLoading();
+                } else {
+                    showLoading("Failed to load concerts");
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Concert>> call, Throwable t) {
+                showLoading("Failed to load concerts");
+            }
+        });
+    }
+
+    public void OnClickFriends(View view) {}
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
     }
-
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -135,12 +161,6 @@ public class Profile extends AppCompatActivity {
         intent.putExtra(IntentKeys.getUSER_KEY(), user);
         startActivity(intent);
     }
-
-    public void OnClickSocialNetworks(View view) {
-
-    }
-
-    public void OnClickProfileSettings(View view) {
-
-    }
+    public void OnClickSocialNetworks(View view) {}
+    public void OnClickProfileSettings(View view) {}
 }

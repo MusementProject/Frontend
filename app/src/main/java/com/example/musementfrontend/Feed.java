@@ -1,49 +1,103 @@
 package com.example.musementfrontend;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.musementfrontend.Client.APIClient;
+import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
+import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 import com.example.musementfrontend.util.UtilFeed;
 
-import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class Feed extends AppCompatActivity {
-
-
+    private View loadingText;
+    private boolean isLoading = false;
+    private Call<List<Concert>> currentCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_feed);
         UtilButtons.Init(this);
-        ConstraintLayout feed = findViewById(R.id.feed_item);
-        fillConcerts();
+        loadConcertFeed();
     }
-
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu, menu);
-        Log.d("Profile", "menu");
-        return true;
+    protected void onResume() {
+        super.onResume();
+        loadConcertFeed();
     }
 
-    public void fillConcerts(){
-        // get content from data_base
-        List<Concert> concerts = new ArrayList<>();
-        for (int i = 0; i < 20; ++i){
-            concerts.add(new Concert(1, 1,  "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg", "A2", new Date(1000)));
+    private void showLoading() {
+        View feedItem = findViewById(R.id.feed_item);
+        if (feedItem != null) {
+            feedItem.setVisibility(View.GONE);
         }
-        UtilFeed.FillFeedConcert(this, concerts);
+    }
+
+    private void hideLoading() {
+        View feedItem = findViewById(R.id.feed_item);
+        if (feedItem != null) {
+            feedItem.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void loadConcertFeed() {
+        if (isLoading) {
+            return;
+        }
+        isLoading = true;
+        User user = Util.getUser(getIntent());
+        if (user == null) {
+            isLoading = false;
+            Toast.makeText(this, "Error: User not found", Toast.LENGTH_LONG).show();
+            return;
+        }
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        currentCall = apiService.getConcertFeed("Bearer " + user.getAccessToken(), user.getId());
+        currentCall.enqueue(new Callback<List<Concert>>() {
+            @Override
+            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
+                isLoading = false;
+                currentCall = null;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Concert> concerts = response.body();
+                    View feedItem = findViewById(R.id.feed_item);
+                    if (feedItem != null) {
+                        LinearLayout feed = feedItem.findViewById(R.id.feed);
+                        if (feed != null) {
+                            feed.removeAllViews();
+                            UtilFeed.FillFeedConcert(Feed.this, concerts);
+                        } else {
+                            Toast.makeText(Feed.this, "Error: feed not found", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(Feed.this, "Error: feedItem not found", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(Feed.this, "Error loading concerts: " + response.code(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Concert>> call, Throwable t) {
+                isLoading = false;
+                currentCall = null;
+                Toast.makeText(Feed.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

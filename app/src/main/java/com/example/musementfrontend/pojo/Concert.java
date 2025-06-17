@@ -1,18 +1,56 @@
 package com.example.musementfrontend.pojo;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-@AllArgsConstructor
 public class Concert {
-    private int id_concert;
-    private int id_artist;
+    private int id;
+    private int artistId;
+    private String artistName;
     private String imageUrl;
     private String location;
-    private Date date;
+    private String date;
+    private boolean attending;
+
+    public Concert() {}
+
+    public Concert(int id, int artistId, String artistName, String imageUrl, String location, String date, boolean attending) {
+        this.id = id;
+        this.artistId = artistId;
+        this.artistName = artistName;
+        this.imageUrl = imageUrl;
+        this.location = location;
+        this.date = date;
+        this.attending = attending;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public int getArtistId() { return artistId; }
+    public void setArtistId(int artistId) { this.artistId = artistId; }
+
+    public String getArtistName() { return artistName; }
+    public void setArtistName(String artistName) { this.artistName = artistName; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
+
+    public String getFormattedDate() {
+        try {
+            LocalDateTime dateTime = LocalDateTime.parse(date);
+            return dateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        } catch (Exception e) {
+            return date;
+        }
+    }
+
+    public boolean isAttending() { return attending; }
+    public void setAttending(boolean attending) { this.attending = attending; }
 }
