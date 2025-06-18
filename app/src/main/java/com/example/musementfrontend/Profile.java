@@ -11,10 +11,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -28,6 +24,7 @@ import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.IntentKeys;
+import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 import com.example.musementfrontend.util.UtilFeed;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -36,9 +33,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Profile extends AppCompatActivity {
     private User user;
@@ -97,7 +96,6 @@ public class Profile extends AppCompatActivity {
         userId = intent.getLongExtra("userId", 0L);
 
         // 2) prepare UserDTO from intent
-        // TODO profilePicture ??
         userDTO = new UserDTO(
                 intent.getStringExtra("username"),
                 intent.getStringExtra("email"),
@@ -166,8 +164,6 @@ public class Profile extends AppCompatActivity {
                     }
                 });
 
-        fillUserConcerts();
-
         // set up menu buttons
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
@@ -177,8 +173,6 @@ public class Profile extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if (itemId == R.id.profile_settings) {
                     Intent intentSettings = getIntentSettings();
-
-                    // start ProfileSettings activity with launcher
                     profileSettingsLauncher.launch(intentSettings);
                     return true;
                 }
@@ -197,8 +191,6 @@ public class Profile extends AppCompatActivity {
     @NonNull
     private Intent getIntentSettings() {
         Intent intentSettings = new Intent(Profile.this, ProfileSettings.class);
-
-        // put all user data into intent
         intentSettings.putExtra("username", userDTO.getUsername());
         intentSettings.putExtra("email", userDTO.getEmail());
         intentSettings.putExtra("bio", userDTO.getBio());
@@ -221,6 +213,9 @@ public class Profile extends AppCompatActivity {
             nickname.setText(userDTO.getNickname());
             setUserAvatar();
         }
+
+        // Load concerts when activity resumes
+        loadAttendingConcerts();
     }
 
     private void setUserAvatar() {
@@ -252,17 +247,38 @@ public class Profile extends AppCompatActivity {
         }
     }
 
-    private void fillUserConcerts() {
-        List<Concert> concerts = new ArrayList<>();
-        for (int i = 0; i < 20; ++i) {
-            concerts.add(new Concert(
-                    1,
-                    1,
-                    "https://vdnh.ru/upload/resize_cache/iblock/edb/1000_1000_1/edb1fcf17e7b3933296993fac951fd9c.jpg",
-                    "A2",
-                    new Date(1000)));
-        }
-        UtilFeed.FillFeedConcert(this, concerts);
+    private void showLoading(String message) {
+        TextView loadingText = findViewById(R.id.loading_text);
+        loadingText.setText(message);
+        loadingText.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        TextView loadingText = findViewById(R.id.loading_text);
+        loadingText.setVisibility(View.GONE);
+    }
+
+    private void loadAttendingConcerts() {
+        // showLoading("Loading concerts...");
+        User user = Util.getUser(getIntent());
+        if (user == null) return;
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<Concert>>() {
+            @Override
+            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UtilFeed.FillProfileConcerts(Profile.this, response.body());
+                    hideLoading();
+                } else {
+                    showLoading("Failed to load concerts");
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Concert>> call, Throwable t) {
+                showLoading("Failed to load concerts");
+            }
+        });
     }
 
     public void OnClickFriends(View view) {
@@ -273,28 +289,21 @@ public class Profile extends AppCompatActivity {
         dialog.show(getSupportFragmentManager(), "friends");
     }
 
-
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra(IntentKeys.getUSER_KEY(), user);
         startActivity(intent);
     }
 
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra("username", userDTO.getUsername());
-        intent.putExtra("email", userDTO.getEmail());
-        intent.putExtra("bio", userDTO.getBio());
-        intent.putExtra("nickname", userDTO.getNickname());
-        intent.putExtra("profilePicture", userDTO.getProfilePicture());
+        intent.putExtra(IntentKeys.getUSER_KEY(), user);
         UtilButtons.fillIntent(intent, user);
         startActivity(intent);
     }
 
-    public void OnClickSocialNetworks(View view) {
-    }
-
-    public void OnClickProfileSettings(View view) {
-    }
+    public void OnClickSocialNetworks(View view) {}
+    public void OnClickProfileSettings(View view) {}
 }

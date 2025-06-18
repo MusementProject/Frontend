@@ -9,19 +9,35 @@ public class APIClient {
 
     private static Retrofit retrofit = null;
 
-    private static final String BASE_URL = "http://10.0.2.2:8080";
+    public static final String BASE_URL = "http://10.0.2.2:8080";
+    private static final int DEFAULT_TIMEOUT_SECONDS = 30;
 
     public static Retrofit getClient() {
         if (retrofit == null) {
-            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(JacksonConverterFactory.create())
-                    .client(client)
-                    .build();
+            retrofit = createDefaultRetrofit();
         }
         return retrofit;
+    }
+
+    public static void setRetrofit(Retrofit newRetrofit) {
+        retrofit = newRetrofit;
+    }
+
+    private static Retrofit createDefaultRetrofit() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .connectTimeout(DEFAULT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(DEFAULT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(DEFAULT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
+                
+        return new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .client(client)
+                .build();
     }
 }
