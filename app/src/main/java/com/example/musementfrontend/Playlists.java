@@ -92,7 +92,13 @@ public class Playlists extends AppCompatActivity {
     }
 
     private void loadPlaylists() {
-        User user = Util.getUser(getIntent());
+//        User user = Util.getUser(getIntent());
+        Bundle arguments = getIntent().getExtras();
+        User user = null;
+        if (arguments != null) {
+            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+        }
+
         APIService apiService = APIClient.getClient().create(APIService.class);
         Call<List<PlaylistResponseDTO>> call = apiService.getUserPlaylists("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<PlaylistResponseDTO>>() {

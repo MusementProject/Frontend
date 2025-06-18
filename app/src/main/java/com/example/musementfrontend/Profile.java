@@ -292,17 +292,14 @@ public class Profile extends AppCompatActivity {
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.putExtra(IntentKeys.getUSER_KEY(), user);
         startActivity(intent);
     }
 
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra("username", userDTO.getUsername());
-        intent.putExtra("email", userDTO.getEmail());
-        intent.putExtra("bio", userDTO.getBio());
-        intent.putExtra("nickname", userDTO.getNickname());
-        intent.putExtra("profilePicture", userDTO.getProfilePicture());
+        intent.putExtra(IntentKeys.getUSER_KEY(), user);
         UtilButtons.fillIntent(intent, user);
         startActivity(intent);
     }
