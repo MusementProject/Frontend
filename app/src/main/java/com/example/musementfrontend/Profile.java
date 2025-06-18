@@ -258,7 +258,25 @@ public class Profile extends AppCompatActivity {
         loadingText.setVisibility(View.GONE);
     }
 
-    private void loadAttendingConcerts() {
+    private void loadAttendingConcerts() {        User user = Util.getUser(getIntent());
+        if (user == null) return;
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<Concert>>() {
+            @Override
+            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UtilFeed.FillProfileConcerts(Profile.this, response.body());
+                    hideLoading();
+                } else {
+                    showLoading("Failed to load concerts");
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Concert>> call, Throwable t) {
+                showLoading("Failed to load concerts");
+            }
+        });
     }
 
     public void OnClickFriends(View view) {
