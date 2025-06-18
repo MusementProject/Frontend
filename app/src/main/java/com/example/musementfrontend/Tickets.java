@@ -112,18 +112,32 @@ public class Tickets extends AppCompatActivity
     }
 
     @Override
-    public void onDelete(Ticket t) {
-        api.deleteTicket(token, t.getId())
+    public void onDelete(Ticket ticket) {
+        String authHeader = "Bearer " + token;
+        api.deleteTicket(authHeader, ticket.getId())
                 .enqueue(new Callback<Void>() {
-                    @Override public void onResponse(Call<Void> c, Response<Void> r) {
-                        if (r.isSuccessful()) loadTickets();
-                        else Toast.makeText(Tickets.this, "Delete failed", Toast.LENGTH_SHORT).show();
+                    @Override public void onResponse(Call<Void> call, Response<Void> r) {
+                        if (r.isSuccessful()) {
+                            // вариант A: перезагрузить весь список
+                            loadTickets();
+                            // вариант B: удалить один элемент и оповестить адаптер
+                            // int pos = tickets.indexOf(ticket);
+                            // tickets.remove(pos);
+                            // adapter.notifyItemRemoved(pos);
+                        } else {
+                            Toast.makeText(Tickets.this,
+                                    "Не удалось удалить: " + r.code(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    @Override public void onFailure(Call<Void> c, Throwable t) {
-                        Toast.makeText(Tickets.this, "Delete failed", Toast.LENGTH_SHORT).show();
+                    @Override public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(Tickets.this,
+                                "Ошибка сети при удалении",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
 
     @Override
     public void onReplace(Ticket t) {
@@ -134,16 +148,18 @@ public class Tickets extends AppCompatActivity
         dlg.show(getSupportFragmentManager(), "upload");
     }
 
-    @Override public void onPreview(Ticket t) {
-        Uri uri = Uri.parse(t.getFileUrl());
-        String mime = t.getFileFormat().equalsIgnoreCase("pdf")
-                ? "application/pdf"
-                : "image/png";
+    @Override
+    public void onPreview(Ticket t) {
+        if ("pdf".equalsIgnoreCase(t.getFileFormat())) {
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(uri, mime);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        startActivity(Intent.createChooser(intent, "Открыть файл"));
+        } else {
+            Uri uri = Uri.parse(t.getFileUrl());
+            Intent img = new Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(uri, "image/*")
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(img, "Открыть изображение"));
+        }
     }
-}
+
+
+ }

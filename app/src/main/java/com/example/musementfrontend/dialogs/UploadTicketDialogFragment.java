@@ -91,7 +91,7 @@ public class UploadTicketDialogFragment extends DialogFragment {
         loadConcerts();
 
         btnPickFile.setOnClickListener(v ->
-                pickFileLauncher.launch(new String[]{"image/jpeg","application/pdf"})
+                pickFileLauncher.launch(new String[]{"image/*","application/pdf"})
         );
 
         btnUpload.setOnClickListener(v -> {
