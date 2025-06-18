@@ -51,6 +51,12 @@ public class Concert {
         }
     }
 
+    @Override
+    public String toString() {
+        // name + location + date
+        return artistName + " @ " + location + " — " + getFormattedDate();
+    }
+
     public boolean isAttending() { return attending; }
     public void setAttending(boolean attending) { this.attending = attending; }
 }

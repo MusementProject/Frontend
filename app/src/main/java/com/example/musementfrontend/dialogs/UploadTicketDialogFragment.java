@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -20,8 +21,12 @@ import androidx.fragment.app.DialogFragment;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.R;
+import com.example.musementfrontend.dto.ConcertDTO;
+import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
+import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.MediaUploadUtil;
+import com.example.musementfrontend.util.Util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +52,7 @@ public class UploadTicketDialogFragment extends DialogFragment {
     private Spinner spinnerConcerts;
     private Button btnPickFile, btnUpload;
     private Uri pickedUri;
-    private List<Concert> concerts;
+    private List<ConcertDTO> concerts;
 
     private final ActivityResultLauncher<String[]> pickFileLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
@@ -111,51 +116,60 @@ public class UploadTicketDialogFragment extends DialogFragment {
     }
 
     private void loadConcerts() {
-        // 1) Получаем API
-        APIService api = APIClient.getClient().create(APIService.class);
-
-        // 2) Достаём из Intent родительской Activity токен и userId
-        Intent host = requireActivity().getIntent();
-        String token = host.getStringExtra("accessToken");
-        long userId = host.getLongExtra("userId", -1L);
-        if (token == null || userId < 0) {
-            Toast.makeText(requireContext(),
-                    "Не переданы данные пользователя", Toast.LENGTH_SHORT).show();
+        User user = Util.getUser(requireActivity().getIntent());
+        if (user == null) {
+            Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 3) Запрос к серверу
-        api.getUserConcerts(token, userId)
-                .enqueue(new Callback<List<Concert>>() {
+        String authHeader = "Bearer " + user.getAccessToken();
+        long userId       = user.getId();
+
+        APIService api = APIClient.getClient().create(APIService.class);
+        api.getUserConcerts(authHeader, userId)
+                .enqueue(new Callback<List<ConcertDTO>>() {
                     @Override
-                    public void onResponse(Call<List<Concert>> call,
-                                           Response<List<Concert>> resp) {
-                        if (resp.isSuccessful() && resp.body() != null) {
-                            concerts = resp.body();
-                            // 4) Обновляем Spinner
-                            ArrayAdapter<Concert> a = new ArrayAdapter<>(
-                                    requireContext(),
-                                    android.R.layout.simple_spinner_item,
-                                    concerts
-                            );
-                            a.setDropDownViewResource(
-                                    android.R.layout.simple_spinner_dropdown_item
-                            );
-                            spinnerConcerts.setAdapter(a);
+                    public void onResponse(Call<List<ConcertDTO>> call,
+                                           Response<List<ConcertDTO>> resp) {
+                        if (resp.isSuccessful()) {
+                            List<ConcertDTO> list = resp.body();
+                            // <-- вот тут лог:
+                            Log.d("UploadTicketDlg", "Fetched concerts count="
+                                    + (list != null ? list.size() : "null")
+                                    + " : " + list);
+                            if (list != null && !list.isEmpty()) {
+                                concerts = list;
+                                ArrayAdapter<ConcertDTO> adapter = new ArrayAdapter<>(
+                                        requireContext(),
+                                        android.R.layout.simple_spinner_item,
+                                        concerts
+                                );
+                                adapter.setDropDownViewResource(
+                                        android.R.layout.simple_spinner_dropdown_item
+                                );
+                                spinnerConcerts.setAdapter(adapter);
+                            } else {
+                                Toast.makeText(requireContext(),
+                                        "Нет концертов для показа",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Toast.makeText(requireContext(),
                                     "Не удалось загрузить концерты: " + resp.code(),
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
-
                     @Override
-                    public void onFailure(Call<List<Concert>> call, Throwable t) {
+                    public void onFailure(Call<List<ConcertDTO>> call, Throwable t) {
+                        Log.e("UploadTicketDlg", "Ошибка сети при loadConcerts", t);
                         Toast.makeText(requireContext(),
                                 "Ошибка сети: " + t.getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
+
+
 
 }
