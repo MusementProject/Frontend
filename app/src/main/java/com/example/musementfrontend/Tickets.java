@@ -82,7 +82,8 @@ public class Tickets extends AppCompatActivity
 
 
     private void loadTickets() {
-        api.getTickets(token).enqueue(new Callback<List<Ticket>>() {
+        api.getTickets("Bearer " + token)
+                .enqueue(new Callback<List<Ticket>>() {
             @Override public void onResponse(Call<List<Ticket>> c,
                                              Response<List<Ticket>> r) {
                 if (r.isSuccessful() && r.body()!=null) {
@@ -98,7 +99,7 @@ public class Tickets extends AppCompatActivity
     public void onUpload(long concertId, MultipartBody.Part filePart) {
         RequestBody cid = RequestBody.create(
                 String.valueOf(concertId), MediaType.parse("text/plain"));
-        api.uploadTicket(token, cid, filePart)
+        api.uploadTicket( "Bearer " + token, cid, filePart)
                 .enqueue(new Callback<Ticket>() {
                     @Override public void onResponse(Call<Ticket> c, Response<Ticket> r) {
                         if (r.isSuccessful()) loadTickets();
@@ -134,6 +135,15 @@ public class Tickets extends AppCompatActivity
     }
 
     @Override public void onPreview(Ticket t) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(t.getFileUrl())));
+        Uri uri = Uri.parse(t.getFileUrl());
+        String mime = t.getFileFormat().equalsIgnoreCase("pdf")
+                ? "application/pdf"
+                : "image/png";
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mime);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        startActivity(Intent.createChooser(intent, "Открыть файл"));
     }
 }

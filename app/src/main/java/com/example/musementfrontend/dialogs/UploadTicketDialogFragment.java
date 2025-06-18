@@ -95,7 +95,7 @@ public class UploadTicketDialogFragment extends DialogFragment {
         );
 
         btnUpload.setOnClickListener(v -> {
-            Concert sel = (Concert) spinnerConcerts.getSelectedItem();
+            ConcertDTO sel = (ConcertDTO) spinnerConcerts.getSelectedItem();
             long concertId = sel.getId();
 
             MultipartBody.Part part =
