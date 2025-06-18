@@ -21,13 +21,13 @@
         android:id="@+id/btnPickFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose File"
+        android:text="Choose ticket file"
         android:layout_marginTop="12dp"/>
 
     <Button
         android:id="@+id/btnUpload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Загрузить"
+        android:text="Add Ticket"
         android:layout_marginTop="8dp"/>
 </LinearLayout>

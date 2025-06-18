@@ -7,15 +7,21 @@
     android:layout_height="match_parent"
     tools:context=".Tickets">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddTicket"
-        android:layout_width="wrap_content"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddTicket"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_add"
-        android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:backgroundTint="@color/light_orange"
+        android:textColor="@color/black"
+        android:text="Add Ticket"
+        android:insetTop="12dp"
+        android:insetBottom="12dp"
+        app:cornerRadius="24dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintBottom_toTopOf="@id/main_menu"
+        android:layout_margin="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTickets"

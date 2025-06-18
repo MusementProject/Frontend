@@ -1,9 +1,9 @@
 package com.example.musementfrontend.Client;
 
 import com.example.musementfrontend.dto.ConcertDTO;
-import com.example.musementfrontend.dto.PlaylistResponseDTO;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.ImageResponseDTO;
+import com.example.musementfrontend.dto.PlaylistResponseDTO;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.dto.UserDTO;
@@ -12,10 +12,7 @@ import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
-
-import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
-import com.example.musementfrontend.pojo.PlaylistInfo;
 import com.example.musementfrontend.pojo.Ticket;
 
 import java.util.List;
@@ -31,9 +28,9 @@ import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import retrofit2.http.Part;
 
 public interface APIService {
 

@@ -2,7 +2,6 @@ package com.example.musementfrontend.pojo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -21,14 +20,14 @@ public class Playlist implements Serializable {
     private String playlistUrl;
     private Map<Artist, Integer> artistSongCounts;
 
-    public Playlist(int id, String title, String playlistUrl){
+    public Playlist(int id, String title, String playlistUrl) {
         this.id = id;
         this.title = title;
         this.playlistUrl = playlistUrl;
         this.artistSongCounts = new HashMap<>();
     }
 
-    public Playlist(int id, String title, String playlistUrl, List<PlaylistInfo> playlistInfos){
+    public Playlist(int id, String title, String playlistUrl, List<PlaylistInfo> playlistInfos) {
         this.id = id;
         this.title = title;
         this.playlistUrl = playlistUrl;

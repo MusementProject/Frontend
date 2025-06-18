@@ -1,5 +1,6 @@
 package com.example.musementfrontend.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,6 @@ public class TicketsAdapter extends RecyclerView.Adapter<TicketsAdapter.VH> {
 
     public interface Listener {
         void onDelete(Ticket ticket);
-        void onReplace(Ticket ticket);
         void onPreview(Ticket ticket);
     }
 
@@ -42,9 +42,10 @@ public class TicketsAdapter extends RecyclerView.Adapter<TicketsAdapter.VH> {
         return new VH(v);
     }
 
+    @SuppressLint({"SetTextI18n", "ResourceAsColor"})
     @Override public void onBindViewHolder(@NonNull VH h, int pos) {
         final Ticket t = tickets.get(pos);
-        h.tvName.setText(t.getConcertArtist() + " @ " + t.getConcertLocation());
+        h.tvName.setText(t.getConcertArtist() + " (" + t.getConcertLocation() + ")");
         h.tvDate.setText(df.format(t.getConcertDate()));
         if ("pdf".equalsIgnoreCase(t.getFileFormat())) {
             h.ivPreview.setImageResource(R.drawable.ic_pdf);
@@ -53,12 +54,12 @@ public class TicketsAdapter extends RecyclerView.Adapter<TicketsAdapter.VH> {
                     .centerCrop().into(h.ivPreview);
         }
         h.btnDel.setOnClickListener(v -> listener.onDelete(t));
-        h.btnRep.setOnClickListener(v -> listener.onReplace(t));
         h.ivPreview.setOnClickListener(v -> listener.onPreview(t));
     }
 
     @Override public int getItemCount() { return tickets.size(); }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateTickets(List<Ticket> newList) {
         tickets.clear();
         tickets.addAll(newList);
@@ -75,7 +76,6 @@ public class TicketsAdapter extends RecyclerView.Adapter<TicketsAdapter.VH> {
             tvName    = v.findViewById(R.id.tvEventName);
             tvDate    = v.findViewById(R.id.tvEventDate);
             btnDel    = v.findViewById(R.id.btnDelete);
-            btnRep    = v.findViewById(R.id.btnReplace);
         }
     }
 }

@@ -1,11 +1,11 @@
 package com.example.musementfrontend.pojo;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -18,6 +18,6 @@ public class Ticket {
     private String concertLocation;
     private Date concertDate;
     private String fileUrl;
-    private String fileFormat;   // e.g. "jpg" or "pdf"
+    private String fileFormat;
     private Date uploadedAt;
 }

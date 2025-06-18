@@ -1,14 +1,16 @@
 package com.example.musementfrontend;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dialogs.UploadTicketDialogFragment;
@@ -17,10 +19,11 @@ import com.example.musementfrontend.pojo.Ticket;
 import com.example.musementfrontend.util.IntentKeys;
 import com.example.musementfrontend.util.TicketsAdapter;
 import com.example.musementfrontend.util.UtilButtons;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import java.io.InputStream;
+import com.google.android.material.button.MaterialButton;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -33,13 +36,13 @@ public class Tickets extends AppCompatActivity
 
     private APIService api;
     private String token;
-    private List<Ticket> tickets = new ArrayList<>();
+    private final List<Ticket> tickets = new ArrayList<>();
     private TicketsAdapter adapter;
-    private enum Action {UPLOAD, REPLACE}
     private Action pendingAction;
     private Ticket pendingTicket;
 
-    @Override protected void onCreate(Bundle b) {
+    @Override
+    protected void onCreate(Bundle b) {
         super.onCreate(b);
         setContentView(R.layout.activity_tickets);
 
@@ -50,6 +53,7 @@ public class Tickets extends AppCompatActivity
             user = (User) arguments.get(IntentKeys.getUSER_KEY());
         }
         api = APIClient.getClient().create(APIService.class);
+        assert user != null;
         token = user.getAccessToken();
 
         RecyclerView rv = findViewById(R.id.rvTickets);
@@ -57,8 +61,8 @@ public class Tickets extends AppCompatActivity
         adapter = new TicketsAdapter(this, tickets, this);
         rv.setAdapter(adapter);
 
-        FloatingActionButton fab = findViewById(R.id.fabAddTicket);
-        fab.setOnClickListener(v -> {
+        MaterialButton btnAddTicket = findViewById(R.id.btnAddTicket);
+        btnAddTicket.setOnClickListener(v -> {
             pendingAction = Action.UPLOAD;
             UploadTicketDialogFragment dlg = UploadTicketDialogFragment.newInstance();
             dlg.show(getSupportFragmentManager(), "upload");
@@ -70,43 +74,67 @@ public class Tickets extends AppCompatActivity
     private void performReplace(long ticketId, MultipartBody.Part part) {
         api.replaceTicket(token, ticketId, part)
                 .enqueue(new Callback<Ticket>() {
-                    @Override public void onResponse(Call<Ticket> call, Response<Ticket> r) {
+                    @Override
+                    public void onResponse(@NonNull Call<Ticket> call, @NonNull Response<Ticket> r) {
                         if (r.isSuccessful()) loadTickets();
-                        else Toast.makeText(Tickets.this, "Replace failed", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(Tickets.this,
+                                    "Replace failed",
+                                    Toast.LENGTH_SHORT).show();
                     }
-                    @Override public void onFailure(Call<Ticket> call, Throwable t) {
-                        Toast.makeText(Tickets.this, "Replace failed", Toast.LENGTH_SHORT).show();
+
+                    @Override
+                    public void onFailure(@NonNull Call<Ticket> call, @NonNull Throwable t) {
+                        Toast.makeText(Tickets.this,
+                                "Replace failed",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-
     private void loadTickets() {
         api.getTickets("Bearer " + token)
                 .enqueue(new Callback<List<Ticket>>() {
-            @Override public void onResponse(Call<List<Ticket>> c,
-                                             Response<List<Ticket>> r) {
-                if (r.isSuccessful() && r.body()!=null) {
-                    tickets.clear(); tickets.addAll(r.body());
-                    adapter.notifyDataSetChanged();
-                }
-            }
-            @Override public void onFailure(Call<List<Ticket>> c, Throwable t) {}
-        });
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void onResponse(
+                            @NonNull Call<List<Ticket>> c,
+                            @NonNull Response<List<Ticket>> r) {
+                        if (r.isSuccessful() && r.body() != null) {
+                            tickets.clear();
+                            tickets.addAll(r.body());
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<List<Ticket>> c, @NonNull Throwable t) {
+                    }
+                });
     }
 
     @Override
     public void onUpload(long concertId, MultipartBody.Part filePart) {
         RequestBody cid = RequestBody.create(
                 String.valueOf(concertId), MediaType.parse("text/plain"));
-        api.uploadTicket( "Bearer " + token, cid, filePart)
+        api.uploadTicket("Bearer " + token, cid, filePart)
                 .enqueue(new Callback<Ticket>() {
-                    @Override public void onResponse(Call<Ticket> c, Response<Ticket> r) {
-                        if (r.isSuccessful()) loadTickets();
-                        else Toast.makeText(Tickets.this, "Upload failed", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onResponse(@NonNull Call<Ticket> c, @NonNull Response<Ticket> r) {
+                        if (r.isSuccessful()) {
+                            loadTickets();
+                        } else {
+                            Toast.makeText(Tickets.this,
+                                    "Upload failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    @Override public void onFailure(Call<Ticket> c, Throwable t) {
-                        Toast.makeText(Tickets.this, "Upload failed", Toast.LENGTH_SHORT).show();
+
+                    @Override
+                    public void onFailure(@NonNull Call<Ticket> c, @NonNull Throwable t) {
+                        Toast.makeText(Tickets.this,
+                                "Upload failed",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -116,50 +144,35 @@ public class Tickets extends AppCompatActivity
         String authHeader = "Bearer " + token;
         api.deleteTicket(authHeader, ticket.getId())
                 .enqueue(new Callback<Void>() {
-                    @Override public void onResponse(Call<Void> call, Response<Void> r) {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> r) {
                         if (r.isSuccessful()) {
-                            // вариант A: перезагрузить весь список
                             loadTickets();
-                            // вариант B: удалить один элемент и оповестить адаптер
-                            // int pos = tickets.indexOf(ticket);
-                            // tickets.remove(pos);
-                            // adapter.notifyItemRemoved(pos);
                         } else {
                             Toast.makeText(Tickets.this,
-                                    "Не удалось удалить: " + r.code(),
+                                    "An error occurred while deleting",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
-                    @Override public void onFailure(Call<Void> call, Throwable t) {
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                         Toast.makeText(Tickets.this,
-                                "Ошибка сети при удалении",
+                                "Network error: " + t.getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-
-    @Override
-    public void onReplace(Ticket t) {
-        UploadTicketDialogFragment dlg = UploadTicketDialogFragment.newInstance();
-        Bundle args = new Bundle();
-        args.putLong("ticketId", t.getId());
-        dlg.setArguments(args);
-        dlg.show(getSupportFragmentManager(), "upload");
-    }
-
     @Override
     public void onPreview(Ticket t) {
-        if ("pdf".equalsIgnoreCase(t.getFileFormat())) {
+        Uri uri = Uri.parse(t.getFileUrl());
+        Intent img = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, "image/*")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(img, "View Ticket Image"));
 
-        } else {
-            Uri uri = Uri.parse(t.getFileUrl());
-            Intent img = new Intent(Intent.ACTION_VIEW)
-                    .setDataAndType(uri, "image/*")
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(img, "Открыть изображение"));
-        }
     }
 
-
- }
+    private enum Action {UPLOAD}
+}

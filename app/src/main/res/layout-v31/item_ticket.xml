@@ -10,8 +10,12 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/ivory"
         android:padding="12dp">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/system_accent1_0"
+            android:layout_alignParentTop="true" />
 
         <!-- Превью: картинка или PDF -->
         <ImageView
