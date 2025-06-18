@@ -7,6 +7,16 @@
     android:layout_height="match_parent"
     tools:context=".Tickets">
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTicket"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_add"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTickets"
         android:layout_width="0dp"

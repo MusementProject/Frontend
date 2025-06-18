@@ -259,26 +259,6 @@ public class Profile extends AppCompatActivity {
     }
 
     private void loadAttendingConcerts() {
-        // showLoading("Loading concerts...");
-        User user = Util.getUser(getIntent());
-        if (user == null) return;
-        APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
-        call.enqueue(new Callback<List<Concert>>() {
-            @Override
-            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    UtilFeed.FillProfileConcerts(Profile.this, response.body());
-                    hideLoading();
-                } else {
-                    showLoading("Failed to load concerts");
-                }
-            }
-            @Override
-            public void onFailure(Call<List<Concert>> call, Throwable t) {
-                showLoading("Failed to load concerts");
-            }
-        });
     }
 
     public void OnClickFriends(View view) {
@@ -293,6 +273,8 @@ public class Profile extends AppCompatActivity {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        UtilButtons.fillIntent(intent, user);
+        Log.d("Profile", "########## Opening Tickets activity with user: " + user);
         startActivity(intent);
     }
 

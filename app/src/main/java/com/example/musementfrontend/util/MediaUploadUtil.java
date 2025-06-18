@@ -82,4 +82,15 @@ public class MediaUploadUtil {
                 partName, filename, reqBody
         );
     }
+
+    public static MultipartBody.Part getMultipartBodyPart(
+            Context ctx, Uri uri, String partName, String filename) throws IOException {
+        String mime = ctx.getContentResolver().getType(uri);
+        InputStream is = ctx.getContentResolver().openInputStream(uri);
+        byte[] data = new byte[is.available()];
+        is.read(data); is.close();
+
+        RequestBody rb = RequestBody.create(data, MediaType.parse(mime));
+        return MultipartBody.Part.createFormData(partName, filename, rb);
+    }
 }

@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -19,6 +21,8 @@ import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.pojo.Concert;
+import com.example.musementfrontend.util.MediaUploadUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -53,6 +57,10 @@ public class UploadTicketDialogFragment extends DialogFragment {
                 }
             });
 
+    public static UploadTicketDialogFragment newInstance() {
+        return new UploadTicketDialogFragment();
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -83,25 +91,16 @@ public class UploadTicketDialogFragment extends DialogFragment {
 
         btnUpload.setOnClickListener(v -> {
             Concert sel = (Concert) spinnerConcerts.getSelectedItem();
-            long concertId = sel.getId_concert();
-            RequestBody rb = new RequestBody() {
-                @Override
-                public MediaType contentType() {
-                    return MediaType.parse(Objects.requireNonNull(requireContext().getContentResolver().getType(pickedUri)));
-                }
+            long concertId = sel.getId();
 
-                @Override
-                public void writeTo(@NonNull BufferedSink sink) throws IOException {
-                    try (InputStream in = requireContext().getContentResolver().openInputStream(pickedUri)) {
-                        byte[] buffer = new byte[8192];
-                        int read;
-                        while ((read = in.read(buffer)) != -1) {
-                            sink.write(buffer, 0, read);
-                        }
-                    }
-                }
-            };
-            MultipartBody.Part part = MultipartBody.Part.createFormData("file", "ticket", rb);
+            MultipartBody.Part part =
+                    null;
+            try {
+                part = MediaUploadUtil.getMultipartBodyPart(requireContext(), pickedUri, "file", "ticket");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             listener.onUpload(concertId, part);
             dismiss();
         });
@@ -112,27 +111,51 @@ public class UploadTicketDialogFragment extends DialogFragment {
     }
 
     private void loadConcerts() {
-        // TODO: заменить на реальное API
+        // 1) Получаем API
         APIService api = APIClient.getClient().create(APIService.class);
-        String token = "Bearer " + requireContext().getSharedPreferences("prefs", Context.MODE_PRIVATE)
-                .getString("accessToken", "");
 
-        api.getUserConcerts() // вызываем эндпоинт для списка концертов
+        // 2) Достаём из Intent родительской Activity токен и userId
+        Intent host = requireActivity().getIntent();
+        String token = host.getStringExtra("accessToken");
+        long userId = host.getLongExtra("userId", -1L);
+        if (token == null || userId < 0) {
+            Toast.makeText(requireContext(),
+                    "Не переданы данные пользователя", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 3) Запрос к серверу
+        api.getUserConcerts(token, userId)
                 .enqueue(new Callback<List<Concert>>() {
-                    @Override public void onResponse(Call<List<Concert>> c,
-                                                     Response<List<Concert>> r) {
-                        if (r.isSuccessful() && r.body()!=null) {
-                            concerts = r.body();
-                            ArrayAdapter<Concert> adapter = new ArrayAdapter<>(
+                    @Override
+                    public void onResponse(Call<List<Concert>> call,
+                                           Response<List<Concert>> resp) {
+                        if (resp.isSuccessful() && resp.body() != null) {
+                            concerts = resp.body();
+                            // 4) Обновляем Spinner
+                            ArrayAdapter<Concert> a = new ArrayAdapter<>(
                                     requireContext(),
                                     android.R.layout.simple_spinner_item,
-                                    concerts);
-                            adapter.setDropDownViewResource(
-                                    android.R.layout.simple_spinner_dropdown_item);
-                            spinnerConcerts.setAdapter(adapter);
+                                    concerts
+                            );
+                            a.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item
+                            );
+                            spinnerConcerts.setAdapter(a);
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    "Не удалось загрузить концерты: " + resp.code(),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
-                    @Override public void onFailure(Call<List<Concert>> c, Throwable t) {}
+
+                    @Override
+                    public void onFailure(Call<List<Concert>> call, Throwable t) {
+                        Toast.makeText(requireContext(),
+                                "Ошибка сети: " + t.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
+
 }
