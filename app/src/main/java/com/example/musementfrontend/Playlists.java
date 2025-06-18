@@ -3,6 +3,7 @@ package com.example.musementfrontend;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +22,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dto.PlaylistResponseDTO;
 import com.example.musementfrontend.dto.SpotifyPlaylistRequest;
 import com.example.musementfrontend.dto.SpotifyPlaylistResponse;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Playlist;
 import com.example.musementfrontend.pojo.PlaylistInfo;
 import com.example.musementfrontend.util.IntentKeys;
+import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilButtons;
 
 import java.util.ArrayList;
@@ -39,18 +42,82 @@ import retrofit2.Response;
 
 public class Playlists extends AppCompatActivity {
 
+    private Handler handler = new Handler();
+    private Runnable playlistsUpdater;
+    private static final int UPDATE_INTERVAL = 5000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlists);
         UtilButtons.Init(this);
-        FillPlaylists(this, null);
 
         Button btnAddNewPlaylist = findViewById(R.id.add_playlist_button);
         btnAddNewPlaylist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddPlaylistDialog();
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startAutoUpdate();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopAutoUpdate();
+    }
+
+    private void startAutoUpdate() {
+        if (playlistsUpdater == null) {
+            playlistsUpdater = new Runnable() {
+                @Override
+                public void run() {
+                    loadPlaylists();
+                    handler.postDelayed(this, UPDATE_INTERVAL);
+                }
+            };
+        }
+        handler.post(playlistsUpdater);
+    }
+
+    private void stopAutoUpdate() {
+        handler.removeCallbacks(playlistsUpdater);
+    }
+
+    private void loadPlaylists() {
+//        User user = Util.getUser(getIntent());
+        Bundle arguments = getIntent().getExtras();
+        User user = null;
+        if (arguments != null) {
+            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+        }
+
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<List<PlaylistResponseDTO>> call = apiService.getUserPlaylists("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<PlaylistResponseDTO>>() {
+            @Override
+            public void onResponse(Call<List<PlaylistResponseDTO>> call, Response<List<PlaylistResponseDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<PlaylistResponseDTO> playlistDtos = response.body();
+                    List<Playlist> playlists = new ArrayList<>();
+                    for (PlaylistResponseDTO dto : playlistDtos) {
+                        playlists.add(new Playlist(dto.getPlaylistId().intValue(), dto.getTitle(), dto.getPlaylistUrl(), dto.getPlaylistInfo()));
+                    }
+                    // чем новее плейлист (больше айдишник), тем выше
+                    playlists.sort((a, b) -> Integer.compare(b.getId(), a.getId()));
+                    FillPlaylists(Playlists.this, playlists);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<PlaylistResponseDTO>> call, Throwable t) {
+                Toast.makeText(Playlists.this, "Failed to load playlists", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -116,43 +183,24 @@ public class Playlists extends AppCompatActivity {
         APIService apiService = APIClient.getClient().create(APIService.class);
         Bundle arguments = getIntent().getExtras();
 
-        User user = null;
+        User user;
         if (arguments != null) {
             user = (User) arguments.get(IntentKeys.getUSER_KEY());
+        } else {
+            user = null;
         }
-
-        Log.d("token playlists", user.getAccessToken());
         if (user != null) {
-            Log.d("userToken", user.getAccessToken());
             SpotifyPlaylistRequest request = new SpotifyPlaylistRequest(user.getId(), playlistId, playlistTitle);
-            Call<List<PlaylistInfo>> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
-            call.enqueue(new Callback<List<PlaylistInfo>>() {
+            Call<PlaylistResponseDTO> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
+            call.enqueue(new Callback<PlaylistResponseDTO>() {
                 @Override
-                public void onResponse(Call<List<PlaylistInfo>> call, Response<List<PlaylistInfo>> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        List<PlaylistInfo> playlistInfos = response.body();
-
-                        Playlist convertedPlaylist = new Playlist(playlistTitle, playlistId, playlistInfos);
-
-                        Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
-                        intent.putExtra("playlist", convertedPlaylist);
-                        startActivity(intent);
-                    } else {
-                        String errorMsg = "";
-                        try {
-                            errorMsg = response.errorBody().string();
-                        } catch (Exception e) {
-                            errorMsg = "Error reading errorBody.";
-                        }
-                        Log.e("Playlists", "Response error (" + response.code() + "): " + errorMsg);
-                        Toast.makeText(Playlists.this, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
-                    }
+                public void onResponse(Call<PlaylistResponseDTO> call, Response<PlaylistResponseDTO> response) {
+                    Toast.makeText(Playlists.this, "The playlist will be added soon!", Toast.LENGTH_LONG).show();
                 }
 
                 @Override
-                public void onFailure(Call<List<PlaylistInfo>> call, Throwable t) {
-                    Log.e("Playlists", "API call failed", t);
-                    Toast.makeText(Playlists.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                public void onFailure(Call<PlaylistResponseDTO> call, Throwable t) {
+                    // Toast.makeText(Playlists.this, "Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -163,26 +211,7 @@ public class Playlists extends AppCompatActivity {
         ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
         LinearLayout feed = layout.findViewById(R.id.feed);
 
-        // TODO remove
-//        ArrayList<String> playlistNames = new ArrayList<>(Arrays.asList(
-//                "My 2017",
-//                "Crazy Vibe",
-//                "Midnight Chill",
-//                "Rainy Window Thoughts",
-//                "Dancing in My Room",
-//                "Lost in Daydreams",
-//                "Sunny Mood Boost",
-//                "Autumn Sadness",
-//                "Alone but Okay",
-//                "Soft Chaos",
-//                "Main Character Energy"
-//        ));
-//
-//        playlists = new ArrayList<>();
-//        for (int i = 0; i < playlistNames.size(); i++) {
-//            Playlist p = new Playlist(0, playlistNames.get(i), null);
-//            playlists.add(p);
-//        }
+        feed.removeAllViews();
 
         if (playlists == null || playlists.isEmpty()) {
             TextView emptyText = new TextView(activity);
@@ -203,7 +232,6 @@ public class Playlists extends AppCompatActivity {
             return;
         }
 
-
         int layoutId = R.layout.playlist_item;
         for (final Playlist playlist : playlists) {
             View playlistView = activity.getLayoutInflater().inflate(layoutId, feed, false);
@@ -211,9 +239,26 @@ public class Playlists extends AppCompatActivity {
             playlistName.setText(playlist.getTitle());
 
             playlistView.setOnClickListener(v -> {
-                Intent intent = new Intent(Playlists.this, PlaylistStatistics.class);
-                intent.putExtra("playlist", playlist);
-                startActivity(intent);
+                User user = Util.getUser(activity.getIntent());
+                APIService apiService = APIClient.getClient().create(APIService.class);
+                Call<PlaylistResponseDTO> call = apiService.getPlaylistStats("Bearer " + user.getAccessToken(), (long) playlist.getId());
+                call.enqueue(new Callback<PlaylistResponseDTO>() {
+                    @Override
+                    public void onResponse(Call<PlaylistResponseDTO> call, Response<PlaylistResponseDTO> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            PlaylistResponseDTO dto = response.body();
+                            Playlist realPlaylist = new Playlist(dto.getPlaylistId().intValue(), dto.getTitle(), dto.getPlaylistUrl(), dto.getPlaylistInfo());
+                            Intent intent = new Intent(activity, PlaylistStatistics.class);
+                            intent.putExtra("playlist", realPlaylist);
+                            activity.startActivity(intent);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<PlaylistResponseDTO> call, Throwable t) {
+                        Toast.makeText(activity, "Failed to load playlist stats", Toast.LENGTH_SHORT).show();
+                    }
+                });
             });
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) playlistView.getLayoutParams();
             params.setMargins(0, 0, 0, 60);

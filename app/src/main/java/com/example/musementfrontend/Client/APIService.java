@@ -12,12 +12,10 @@ import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.pojo.PlaylistInfo;
-import com.example.musementfrontend.pojo.Ticket;
 
 import java.util.List;
 
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -66,32 +64,4 @@ public interface APIService {
 
     @GET("/api/users/me")
     Call<User> getCurrentUser(@Header("Authorization") String auth);
-
-    @GET("/api/tickets")
-    Call<List<Ticket>> getTickets(@Header("Authorization") String token);
-
-    @Multipart
-    @POST("/api/tickets")
-    Call<Ticket> uploadTicket(
-            @Header("Authorization") String token,
-            @Part("concertId") RequestBody concertId,
-            @Part MultipartBody.Part file
-    );
-
-    @DELETE("/api/tickets/{id}")
-    Call<Void> deleteTicket(
-            @Header("Authorization") String token,
-            @Path("id") long ticketId
-    );
-
-    @Multipart
-    @PUT("/api/tickets/{id}")
-    Call<Ticket> replaceTicket(
-            @Header("Authorization") String token,
-            @Path("id") long ticketId,
-            @Part MultipartBody.Part file
-    );
-
-    @GET("/api/concerts/attend_user")
-    Call<List<Concert>> getUserConcerts();
 }

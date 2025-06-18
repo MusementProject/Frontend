@@ -1,6 +1,7 @@
 package com.example.musementfrontend;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
@@ -151,6 +152,14 @@ public class Login extends AppCompatActivity {
         intent.putExtra("email", dto.getEmail());
         intent.putExtra("accessToken", jwt);
         intent.putExtra("userId", dto.getId());
+
+        User user = new User();
+        user.setId(dto.getId());
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setAccessToken(jwt);
+        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+
         return intent;
     }
 
