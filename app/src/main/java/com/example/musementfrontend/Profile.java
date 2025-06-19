@@ -258,9 +258,7 @@ public class Profile extends AppCompatActivity {
         loadingText.setVisibility(View.GONE);
     }
 
-    private void loadAttendingConcerts() {
-        // showLoading("Loading concerts...");
-        User user = Util.getUser(getIntent());
+    private void loadAttendingConcerts() {        User user = Util.getUser(getIntent());
         if (user == null) return;
         APIService apiService = APIClient.getClient().create(APIService.class);
         Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
@@ -293,6 +291,8 @@ public class Profile extends AppCompatActivity {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        UtilButtons.fillIntent(intent, user);
+        Log.d("Profile", "########## Opening Tickets activity with user: " + user);
         startActivity(intent);
     }
 

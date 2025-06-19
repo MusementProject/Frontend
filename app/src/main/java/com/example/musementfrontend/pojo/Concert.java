@@ -12,7 +12,8 @@ public class Concert {
     private String date;
     private boolean attending;
 
-    public Concert() {}
+    public Concert() {
+    }
 
     public Concert(int id, int artistId, String artistName, String imageUrl, String location, String date, boolean attending) {
         this.id = id;
@@ -24,23 +25,53 @@ public class Concert {
         this.attending = attending;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public int getArtistId() { return artistId; }
-    public void setArtistId(int artistId) { this.artistId = artistId; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getArtistName() { return artistName; }
-    public void setArtistName(String artistName) { this.artistName = artistName; }
+    public int getArtistId() {
+        return artistId;
+    }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setArtistId(int artistId) {
+        this.artistId = artistId;
+    }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getArtistName() {
+        return artistName;
+    }
 
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
 
     public String getFormattedDate() {
         try {
@@ -51,6 +82,17 @@ public class Concert {
         }
     }
 
-    public boolean isAttending() { return attending; }
-    public void setAttending(boolean attending) { this.attending = attending; }
+    @Override
+    public String toString() {
+        // name + location + date
+        return artistName + " @ " + location + " — " + getFormattedDate();
+    }
+
+    public boolean isAttending() {
+        return attending;
+    }
+
+    public void setAttending(boolean attending) {
+        this.attending = attending;
+    }
 }
