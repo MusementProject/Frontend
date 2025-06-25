@@ -18,6 +18,4 @@ public class Comment {
     private User user;
     private String message;
     private Date time;
-    private String attachedPicture;
-    private List<String> tags;
 }

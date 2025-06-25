@@ -67,19 +67,16 @@ public class Profile extends AppCompatActivity {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
 
-                        // fields that can be changed by the user
                         String newUsername = data.getStringExtra("username");
                         String newBio = data.getStringExtra("bio");
                         String newNick = data.getStringExtra("nickname");
                         String newAvatar = data.getStringExtra("profilePicture");
 
-                        // update userDTO
                         userDTO.setUsername(newUsername);
                         userDTO.setBio(newBio);
                         userDTO.setNickname(newNick);
                         userDTO.setProfilePicture(newAvatar);
 
-                        // update UI
                         username.setText(
                                 getString(R.string.username_handle, userDTO.getUsername())
                         );
@@ -89,13 +86,11 @@ public class Profile extends AppCompatActivity {
                 }
         );
 
-        // 1) init API + get token + userId
         api = APIClient.getClient().create(APIService.class);
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("accessToken");
         userId = intent.getLongExtra("userId", 0L);
 
-        // 2) prepare UserDTO from intent
         userDTO = new UserDTO(
                 intent.getStringExtra("username"),
                 intent.getStringExtra("email"),
@@ -104,7 +99,6 @@ public class Profile extends AppCompatActivity {
                 null
         );
 
-        // 3) find views and set data
         username = findViewById(R.id.username);
         nickname = findViewById(R.id.nickname);
         avatar = findViewById(R.id.avatar);
@@ -113,10 +107,9 @@ public class Profile extends AppCompatActivity {
         username.setText(
                 getString(R.string.username_handle, userDTO.getUsername())
         );
-        nickname.setText(userDTO.getNickname());
+        username.setText(userDTO.getUsername());
         setUserAvatar();
 
-        // 4) load fresh user data from server
         api.getCurrentUser("Bearer " + accessToken)
                 .enqueue(new Callback<User>() {
                     @Override
@@ -124,14 +117,14 @@ public class Profile extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             User serverUser = response.body();
 
-                            // update userDTO from server
+
                             userDTO.setUsername(serverUser.getUsername());
                             userDTO.setEmail(serverUser.getEmail());
                             userDTO.setBio(serverUser.getBio());
                             userDTO.setNickname(serverUser.getNickname());
                             userDTO.setProfilePicture(serverUser.getProfilePicture());
 
-                            // update UI
+
                             username.setText(
                                     getString(R.string.username_handle, userDTO.getUsername())
                             );
@@ -164,7 +157,6 @@ public class Profile extends AppCompatActivity {
                     }
                 });
 
-        // set up menu buttons
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
             MenuInflater inflater = menu.getMenuInflater();
@@ -184,8 +176,6 @@ public class Profile extends AppCompatActivity {
             });
             menu.show();
         });
-
-        Log.d("token", accessToken);
     }
 
     @NonNull
@@ -205,7 +195,7 @@ public class Profile extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // update UI with user data
+
         if (userDTO != null) {
             username.setText(
                     getString(R.string.username_handle, userDTO.getUsername())
@@ -214,7 +204,7 @@ public class Profile extends AppCompatActivity {
             setUserAvatar();
         }
 
-        // Load concerts when activity resumes
+
         loadAttendingConcerts();
     }
 
@@ -259,7 +249,6 @@ public class Profile extends AppCompatActivity {
     }
 
     private void loadAttendingConcerts() {
-        // showLoading("Loading concerts...");
         User user = Util.getUser(getIntent());
         if (user == null) return;
         APIService apiService = APIClient.getClient().create(APIService.class);
@@ -292,14 +281,14 @@ public class Profile extends AppCompatActivity {
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        intent.putExtra(IntentKeys.getUSER(), user);
         startActivity(intent);
     }
 
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        intent.putExtra(IntentKeys.getUSER(), user);
         UtilButtons.fillIntent(intent, user);
         startActivity(intent);
     }

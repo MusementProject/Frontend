@@ -3,9 +3,12 @@ package com.example.musementfrontend.pojo;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import lombok.Setter;
+
 public class Concert {
-    private int id;
-    private int artistId;
+    @Setter
+    private Long id;
+    private Long artistId;
     private String artistName;
     private String imageUrl;
     private String location;
@@ -14,7 +17,7 @@ public class Concert {
 
     public Concert() {}
 
-    public Concert(int id, int artistId, String artistName, String imageUrl, String location, String date, boolean attending) {
+    public Concert(Long id, Long artistId, String artistName, String imageUrl, String location, String date, boolean attending) {
         this.id = id;
         this.artistId = artistId;
         this.artistName = artistName;
@@ -24,11 +27,10 @@ public class Concert {
         this.attending = attending;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public Long getId() { return id; }
 
-    public int getArtistId() { return artistId; }
-    public void setArtistId(int artistId) { this.artistId = artistId; }
+    public Long getArtistId() { return artistId; }
+    public void setArtistId(Long artistId) { this.artistId = artistId; }
 
     public String getArtistName() { return artistName; }
     public void setArtistName(String artistName) { this.artistName = artistName; }

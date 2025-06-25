@@ -74,6 +74,12 @@
                             android:text="Date"
                             android:textColor="@color/white"
                             android:textSize="20sp"/>
+
+                        <ImageButton
+                            android:id="@+id/comments"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/com"/>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

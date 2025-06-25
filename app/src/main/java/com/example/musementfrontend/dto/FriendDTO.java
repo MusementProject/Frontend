@@ -14,5 +14,5 @@ public class FriendDTO {
     private String username;
     private String nickname;
     private String profilePicture;
-//    private boolean accepted;
+    private boolean accepted;
 }

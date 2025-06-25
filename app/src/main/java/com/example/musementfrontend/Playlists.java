@@ -3,6 +3,7 @@ package com.example.musementfrontend;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,7 +49,6 @@ public class Playlists extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlists);
         UtilButtons.Init(this);
         FillPlaylists(this, null);
@@ -92,11 +92,10 @@ public class Playlists extends AppCompatActivity {
     }
 
     private void loadPlaylists() {
-//        User user = Util.getUser(getIntent());
         Bundle arguments = getIntent().getExtras();
         User user = null;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         }
 
         APIService apiService = APIClient.getClient().create(APIService.class);
@@ -185,7 +184,7 @@ public class Playlists extends AppCompatActivity {
 
         User user;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         } else {
             user = null;
         }

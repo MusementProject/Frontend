@@ -1,5 +1,6 @@
 package com.example.musementfrontend.util;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
@@ -18,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.ConcertComments;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
@@ -105,6 +107,18 @@ public class UtilFeed {
                     });
                 });
             }
+
+            ImageButton comments = concertView.findViewById(R.id.comments);
+
+            comments.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity, ConcertComments.class);
+                    intent.putExtra(IntentKeys.getCONCERT_ID(), concert.getId());
+                    intent.putExtra(IntentKeys.getUSER(), Util.getUser(activity.getIntent()));
+                    activity.startActivity(intent);
+                }
+            });
             feed.addView(concertView);
         }
     }
@@ -138,7 +152,22 @@ public class UtilFeed {
             params.setMargins(0, 40, 0, 40);
             concertView.setLayoutParams(params);
 
+            ImageButton comments = concertView.findViewById(R.id.comments);
+
+            comments.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity, ConcertComments.class);
+                    intent.putExtra(IntentKeys.getCONCERT_ID(), concert.getId());
+                    intent.putExtra(IntentKeys.getUSER(), Util.getUser(activity.getIntent()));
+                    Log.d("concert id", String.valueOf(concert.getId()));
+                    activity.startActivity(intent);
+                }
+            });
+
             feed.addView(concertView);
         }
     }
+
+    
 }

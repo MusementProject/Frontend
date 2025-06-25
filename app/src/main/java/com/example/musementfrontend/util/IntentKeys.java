@@ -11,4 +11,7 @@ public class IntentKeys {
 
     @Getter
     private static final String FRIEND_USERNAME = "friend_username";
+
+    @Getter
+    private static final String CONCERT_ID = "concert_id";
 }

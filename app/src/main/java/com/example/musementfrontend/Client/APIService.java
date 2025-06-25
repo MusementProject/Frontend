@@ -12,15 +12,15 @@ import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
 
-import com.example.musementfrontend.pojo.AttendConcertRequest;
+import com.example.musementfrontend.pojo.Comment;
 import com.example.musementfrontend.pojo.Concert;
-import com.example.musementfrontend.pojo.PlaylistInfo;
 
 import java.util.List;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Multipart;
@@ -29,7 +29,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import retrofit2.http.Part;
 
 public interface APIService {
 
@@ -110,4 +109,7 @@ public interface APIService {
 
     @GET("/api/users/searchByUsername")
     Call<List<FriendDTO>> searchByUsername(@Header("Authorization") String authHeader, @Query("q") String query);
+
+    @GET("api/comment/getAll/{userId}/{concertId}")
+    Call<List<Comment>> getConcertComments(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("concertId") Long concertId);
 }
