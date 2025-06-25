@@ -33,9 +33,6 @@
             android:name=".Invitation"
             android:exported="false" />
         <activity
-            android:name=".Recommendation"
-            android:exported="false" />
-        <activity
             android:name=".Feed"
             android:exported="false" />
         <activity

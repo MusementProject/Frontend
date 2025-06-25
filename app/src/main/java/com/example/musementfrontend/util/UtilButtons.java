@@ -14,7 +14,6 @@ import com.example.musementfrontend.Invitation;
 import com.example.musementfrontend.Notification;
 import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.R;
-import com.example.musementfrontend.Recommendation;
 import com.example.musementfrontend.dto.User;
 
 public class UtilButtons {
@@ -27,7 +26,6 @@ public class UtilButtons {
     static private void InitMainMenu(AppCompatActivity activity){
         ConstraintLayout mainMenu = activity.findViewById(R.id.main_menu);
         ImageButton feed = mainMenu.findViewById(R.id.feed);
-        ImageButton recommendation = mainMenu.findViewById(R.id.recommendation);
         ImageButton invitation = mainMenu.findViewById(R.id.invitation);
         ImageButton profile = mainMenu.findViewById(R.id.profile);
 
@@ -39,7 +37,6 @@ public class UtilButtons {
             user = null;
         }
         feed.setOnClickListener(view -> OnClickFeed(view, user));
-        recommendation.setOnClickListener(view -> OnClickRecommendation(view, user));
         invitation.setOnClickListener(view -> OnClickInvitation(view, user));
         profile.setOnClickListener(view -> OnClickProfile(view, user));
 
@@ -85,17 +82,6 @@ public class UtilButtons {
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         fillIntent(intent, user);
         intent.putExtra("accessToken", user.getAccessToken());
-        context.startActivity(intent);
-    }
-
-    static private void OnClickRecommendation(View view, User user){
-        Context context = view.getContext();
-        if(context.getClass() == Recommendation.class){
-            return;
-        }
-        Intent intent = new Intent(context, Recommendation.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        fillIntent(intent, user);
         context.startActivity(intent);
     }
 
