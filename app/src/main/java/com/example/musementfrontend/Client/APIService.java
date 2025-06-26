@@ -1,5 +1,7 @@
 package com.example.musementfrontend.Client;
 
+import com.example.musementfrontend.dto.AddCommentRequestDTO;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.dto.PlaylistResponseDTO;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.ImageResponseDTO;
@@ -12,6 +14,7 @@ import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
+import com.example.musementfrontend.pojo.Comment;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.pojo.Ticket;
 
@@ -149,29 +152,30 @@ public interface APIService {
 
     @POST("api/comment/add")
     Call<Comment> addComment(@Header("Authorization") String authHeader, @Body AddCommentRequestDTO commentRequest);
+
+
+    @GET("/api/tickets")
+    Call<List<Ticket>> getTickets(@Header("Authorization") String authHeader);
+
+    @Multipart
+    @POST("/api/tickets")
+    Call<Ticket> uploadTicket(
+            @Header("Authorization") String authHeader,
+            @Part("concertId") RequestBody concertId,
+            @Part MultipartBody.Part file
+    );
+
+    @Multipart
+    @PUT("/api/tickets/{id}")
+    Call<Ticket> replaceTicket(
+            @Header("Authorization") String authHeader,
+            @Path("id") long ticketId,
+            @Part MultipartBody.Part file
+    );
+
+    @DELETE("/api/tickets/{id}")
+    Call<Void> deleteTicket(
+            @Header("Authorization") String authHeader,
+            @Path("id") long ticketId
+    );
 }
-
-@GET("/api/tickets")
-Call<List<Ticket>> getTickets(@Header("Authorization") String authHeader);
-
-@Multipart
-@POST("/api/tickets")
-Call<Ticket> uploadTicket(
-        @Header("Authorization") String authHeader,
-        @Part("concertId") RequestBody concertId,
-        @Part MultipartBody.Part file
-);
-
-@Multipart
-@PUT("/api/tickets/{id}")
-Call<Ticket> replaceTicket(
-        @Header("Authorization") String authHeader,
-        @Path("id") long ticketId,
-        @Part MultipartBody.Part file
-);
-
-@DELETE("/api/tickets/{id}")
-Call<Void> deleteTicket(
-        @Header("Authorization") String authHeader,
-        @Path("id") long ticketId
-);

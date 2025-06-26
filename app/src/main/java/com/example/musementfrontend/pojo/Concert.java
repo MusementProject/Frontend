@@ -3,6 +3,10 @@ package com.example.musementfrontend.pojo;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+
+@AllArgsConstructor
 public class Concert {
     @Setter
     private Long id;

@@ -1,5 +1,6 @@
 package com.example.musementfrontend.util;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
@@ -22,9 +23,7 @@ import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.ConcertComments;
 import com.example.musementfrontend.dto.User;
-import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
-import com.example.musementfrontend.util.Util;
 
 import com.example.musementfrontend.R;
 
@@ -40,7 +39,7 @@ import retrofit2.Response;
 public class UtilFeed {
     private static final String TAG = "UtilFeed";
 
-    public static void FillFeedConcert(AppCompatActivity activity, List<Concert> concerts) {
+    public static void FillFeedConcert(AppCompatActivity activity, List<ConcertDTO> concertDTOS) {
         ScrollView scroll = activity.findViewById(R.id.scroll);
         View feedItem = activity.findViewById(R.id.feed_item);
         if (feedItem == null) {
@@ -51,6 +50,7 @@ public class UtilFeed {
             return;
         }
         feed.removeAllViews();
+        List<Concert> concerts = convertConcertDTOsToConcerts(concertDTOS);
         if (concerts == null || concerts.isEmpty()) {
             return;
         }
@@ -154,13 +154,13 @@ public class UtilFeed {
         }
     }
 
-    public static void FillProfileConcerts(AppCompatActivity activity, List<Concert> concerts) {
+    public static void FillProfileConcerts(AppCompatActivity activity, List<ConcertDTO> concertsDTOs) {
         ScrollView scroll = activity.findViewById(R.id.scroll);
         ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
         LinearLayout feed = layout.findViewById(R.id.feed);
 
         feed.removeAllViews();
-
+        List<Concert> concerts = convertConcertDTOsToConcerts(concertsDTOs);
         if (concerts == null || concerts.isEmpty()) {
             return;
         }
@@ -406,8 +406,8 @@ public class UtilFeed {
         List<Concert> concerts = new ArrayList<>();
         for (ConcertDTO dto : concertDTOs) {
             Concert concert = new Concert(
-                dto.getId().intValue(),
-                dto.getArtistId().intValue(),
+                    dto.getId(),
+                    dto.getArtistId(),
                 dto.getArtistName(),
                 dto.getImageUrl(),
                 dto.getLocation(),

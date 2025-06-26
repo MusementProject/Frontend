@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dialogs.FriendsDialogFragment;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
@@ -233,22 +234,22 @@ public class Profile extends AppCompatActivity {
         return intentSettings;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // update UI with user data
-        if (userDTO != null) {
-            username.setText(
-                    getString(R.string.username_handle, userDTO.getUsername())
-            );
-            nickname.setText(userDTO.getNickname());
-            setUserAvatar();
-        }
-
-        // Load concerts when activity resumes
-        loadAttendingConcerts();
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        // update UI with user data
+//        if (userDTO != null) {
+//            username.setText(
+//                    getString(R.string.username_handle, userDTO.getUsername())
+//            );
+//            nickname.setText(userDTO.getNickname());
+//            setUserAvatar();
+//        }
+//
+//        // Load concerts when activity resumes
+//        loadAttendingConcerts();
+//    }
 
     private void setUserAvatar() {
         String url = userDTO.getProfilePicture();
@@ -295,10 +296,10 @@ public class Profile extends AppCompatActivity {
         User user = Util.getUser(getIntent());
         if (user == null) return;
         APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
-        call.enqueue(new Callback<List<Concert>>() {
+        Call<List<ConcertDTO>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<ConcertDTO>>() {
             @Override
-            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
+            public void onResponse(Call<List<ConcertDTO>> call, Response<List<ConcertDTO>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     UtilFeed.FillProfileConcerts(Profile.this, response.body());
                     hideLoading();
@@ -307,7 +308,7 @@ public class Profile extends AppCompatActivity {
                 }
             }
             @Override
-            public void onFailure(Call<List<Concert>> call, Throwable t) {
+            public void onFailure(Call<List<ConcertDTO>> call, Throwable t) {
                 showLoading("Failed to load concerts");
             }
         });
