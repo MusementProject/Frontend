@@ -50,7 +50,7 @@ public class Tickets extends AppCompatActivity
         Bundle arguments = getIntent().getExtras();
         User user = null;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         }
         api = APIClient.getClient().create(APIService.class);
         assert user != null;

@@ -56,6 +56,7 @@
         </LinearLayout>
 
         <SearchView
+            android:id="@+id/search"
             android:layout_width="314dp"
             android:layout_height="44dp"
             android:layout_gravity="center"

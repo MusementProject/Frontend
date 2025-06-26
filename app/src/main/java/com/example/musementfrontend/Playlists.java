@@ -49,9 +49,9 @@ public class Playlists extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_playlists);
         UtilButtons.Init(this);
+        FillPlaylists(this, null);
 
         Button btnAddNewPlaylist = findViewById(R.id.add_playlist_button);
         btnAddNewPlaylist.setOnClickListener(new View.OnClickListener() {
@@ -92,11 +92,10 @@ public class Playlists extends AppCompatActivity {
     }
 
     private void loadPlaylists() {
-//        User user = Util.getUser(getIntent());
         Bundle arguments = getIntent().getExtras();
         User user = null;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         }
 
         APIService apiService = APIClient.getClient().create(APIService.class);
@@ -185,11 +184,14 @@ public class Playlists extends AppCompatActivity {
 
         User user;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         } else {
             user = null;
         }
+
+        Log.d("token playlists", user.getAccessToken());
         if (user != null) {
+            Log.d("userToken", user.getAccessToken());
             SpotifyPlaylistRequest request = new SpotifyPlaylistRequest(user.getId(), playlistId, playlistTitle);
             Call<PlaylistResponseDTO> call = apiService.addPlaylist("Bearer " + user.getAccessToken(), request);
             call.enqueue(new Callback<PlaylistResponseDTO>() {
@@ -231,6 +233,7 @@ public class Playlists extends AppCompatActivity {
             feed.addView(emptyText);
             return;
         }
+
 
         int layoutId = R.layout.playlist_item;
         for (final Playlist playlist : playlists) {

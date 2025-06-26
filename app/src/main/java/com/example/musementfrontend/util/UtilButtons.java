@@ -32,7 +32,7 @@ public class UtilButtons {
         Bundle arguments = activity.getIntent().getExtras();
         User user;
         if (arguments != null){
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         } else {
             user = null;
         }
@@ -109,7 +109,7 @@ public class UtilButtons {
 
     public static void fillIntent(Intent intent, User user){
         if (user != null){
-            intent.putExtra(IntentKeys.getUSER_KEY(), user);
+            intent.putExtra(IntentKeys.getUSER(), user);
         }
     }
 }

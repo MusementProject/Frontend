@@ -1,5 +1,6 @@
 package com.example.musementfrontend.util;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
@@ -20,10 +21,9 @@ import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.dto.ConcertDTO;
+import com.example.musementfrontend.ConcertComments;
 import com.example.musementfrontend.dto.User;
-import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
-import com.example.musementfrontend.util.Util;
 
 import com.example.musementfrontend.R;
 
@@ -39,7 +39,7 @@ import retrofit2.Response;
 public class UtilFeed {
     private static final String TAG = "UtilFeed";
 
-    public static void FillFeedConcert(AppCompatActivity activity, List<Concert> concerts) {
+    public static void FillFeedConcert(AppCompatActivity activity, List<ConcertDTO> concertDTOS) {
         ScrollView scroll = activity.findViewById(R.id.scroll);
         View feedItem = activity.findViewById(R.id.feed_item);
         if (feedItem == null) {
@@ -50,6 +50,7 @@ public class UtilFeed {
             return;
         }
         feed.removeAllViews();
+        List<Concert> concerts = convertConcertDTOsToConcerts(concertDTOS);
         if (concerts == null || concerts.isEmpty()) {
             return;
         }
@@ -84,7 +85,6 @@ public class UtilFeed {
             if (btnGoing == null || btnWantToGo == null) {
                 continue;
             }
-            
             if (concert.isAttending()) {
                 btnGoing.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
                 btnGoing.setEnabled(false);
@@ -115,7 +115,7 @@ public class UtilFeed {
                         }
                     });
                 });
-                
+
                 btnWantToGo.setOnClickListener(v -> {
                     btnWantToGo.setEnabled(false);
                     btnGoing.setEnabled(false);
@@ -138,17 +138,29 @@ public class UtilFeed {
                     });
                 });
             }
+
+            ImageButton comments = concertView.findViewById(R.id.comments);
+
+            comments.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity, ConcertComments.class);
+                    intent.putExtra(IntentKeys.getCONCERT_ID(), concert.getId());
+                    intent.putExtra(IntentKeys.getUSER(), Util.getUser(activity.getIntent()));
+                    activity.startActivity(intent);
+                }
+            });
             feed.addView(concertView);
         }
     }
 
-    public static void FillProfileConcerts(AppCompatActivity activity, List<Concert> concerts) {
+    public static void FillProfileConcerts(AppCompatActivity activity, List<ConcertDTO> concertsDTOs) {
         ScrollView scroll = activity.findViewById(R.id.scroll);
         ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
         LinearLayout feed = layout.findViewById(R.id.feed);
 
         feed.removeAllViews();
-
+        List<Concert> concerts = convertConcertDTOsToConcerts(concertsDTOs);
         if (concerts == null || concerts.isEmpty()) {
             return;
         }
@@ -170,6 +182,19 @@ public class UtilFeed {
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
             params.setMargins(0, 40, 0, 40);
             concertView.setLayoutParams(params);
+
+            ImageButton comments = concertView.findViewById(R.id.comments);
+
+            comments.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(activity, ConcertComments.class);
+                    intent.putExtra(IntentKeys.getCONCERT_ID(), concert.getId());
+                    intent.putExtra(IntentKeys.getUSER(), Util.getUser(activity.getIntent()));
+                    Log.d("concert id", String.valueOf(concert.getId()));
+                    activity.startActivity(intent);
+                }
+            });
 
             feed.addView(concertView);
         }
@@ -306,16 +331,16 @@ public class UtilFeed {
                 btnGoing.setOnClickListener(v -> {
                     btnGoing.setEnabled(false);
                     Toast.makeText(activity, "Moving to attending!", Toast.LENGTH_SHORT).show();
-                    
+
                     if (activity instanceof Profile) {
                         Profile profile = (Profile) activity;
                         String accessToken = profile.getIntent().getStringExtra("accessToken");
                         long userId = profile.getIntent().getLongExtra("userId", 0L);
-                        
+
                         if (accessToken == null || userId == 0) {
                             return;
                         }
-                        
+
                         APIService apiService = APIClient.getClient().create(APIService.class);
                         apiService.moveFromWishlistToAttending("Bearer " + accessToken, userId, (long) concert.getId()).enqueue(new Callback<Void>() {
                             @Override
@@ -381,8 +406,8 @@ public class UtilFeed {
         List<Concert> concerts = new ArrayList<>();
         for (ConcertDTO dto : concertDTOs) {
             Concert concert = new Concert(
-                dto.getId().intValue(),
-                dto.getArtistId().intValue(),
+                    dto.getId(),
+                    dto.getArtistId(),
                 dto.getArtistName(),
                 dto.getImageUrl(),
                 dto.getLocation(),

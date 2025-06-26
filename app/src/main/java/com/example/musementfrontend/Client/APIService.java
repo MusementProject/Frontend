@@ -1,6 +1,8 @@
 package com.example.musementfrontend.Client;
 
+import com.example.musementfrontend.dto.AddCommentRequestDTO;
 import com.example.musementfrontend.dto.ConcertDTO;
+import com.example.musementfrontend.dto.PlaylistResponseDTO;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.ImageResponseDTO;
 import com.example.musementfrontend.dto.PlaylistResponseDTO;
@@ -12,6 +14,7 @@ import com.example.musementfrontend.dto.UserRequestLoginWithGoogle;
 import com.example.musementfrontend.dto.UserRequestRegisterDTO;
 import com.example.musementfrontend.dto.UserResponseLoginDTO;
 import com.example.musementfrontend.dto.UserResponseRegisterDTO;
+import com.example.musementfrontend.pojo.Comment;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.pojo.Ticket;
 
@@ -28,9 +31,9 @@ import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
-import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Part;
 
 public interface APIService {
 
@@ -128,6 +131,28 @@ public interface APIService {
 
     @GET("/api/users/me")
     Call<User> getCurrentUser(@Header("Authorization") String auth);
+
+    @GET("/api/users/username/{username}")
+    Call<User> getUserByUsername(@Header("Authorization") String authHeader, @Path("username") String username);
+
+    @GET("/api/friends/get/{userId}/{friendId}")
+    Call<Boolean> getFriendshipInfo(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
+
+    @POST("/api/friends/add/{userId}/{friendId}")
+    Call<FriendDTO> addFriend(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
+
+    @DELETE("/api/friends/delete/{userId}/{friendId}")
+    Call<Boolean> deleteFriend(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("friendId") Long friendId);
+
+    @GET("/api/users/searchByUsername")
+    Call<List<FriendDTO>> searchByUsername(@Header("Authorization") String authHeader, @Query("q") String query);
+
+    @GET("api/comment/getAll/{userId}/{concertId}")
+    Call<List<Comment>> getConcertComments(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("concertId") Long concertId);
+
+    @POST("api/comment/add")
+    Call<Comment> addComment(@Header("Authorization") String authHeader, @Body AddCommentRequestDTO commentRequest);
+
 
     @GET("/api/tickets")
     Call<List<Ticket>> getTickets(@Header("Authorization") String authHeader);

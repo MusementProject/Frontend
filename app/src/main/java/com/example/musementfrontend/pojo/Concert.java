@@ -3,9 +3,14 @@ package com.example.musementfrontend.pojo;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+
+@AllArgsConstructor
 public class Concert {
-    private int id;
-    private int artistId;
+    @Setter
+    private Long id;
+    private Long artistId;
     private String artistName;
     private String imageUrl;
     private String location;
@@ -13,10 +18,9 @@ public class Concert {
     private boolean attending;
     private boolean wishlisted;
 
-    public Concert() {
-    }
+    public Concert() {}
 
-    public Concert(int id, int artistId, String artistName, String imageUrl, String location, String date, boolean attending, boolean wishlisted) {
+    public Concert(Long id, Long artistId, String artistName, String imageUrl, String location, String date, boolean attending) {
         this.id = id;
         this.artistId = artistId;
         this.artistName = artistName;
@@ -24,56 +28,24 @@ public class Concert {
         this.location = location;
         this.date = date;
         this.attending = attending;
-        this.wishlisted = wishlisted;
     }
 
-    public int getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public Long getArtistId() { return artistId; }
+    public void setArtistId(Long artistId) { this.artistId = artistId; }
 
-    public int getArtistId() {
-        return artistId;
-    }
+    public String getArtistName() { return artistName; }
+    public void setArtistName(String artistName) { this.artistName = artistName; }
 
-    public void setArtistId(int artistId) {
-        this.artistId = artistId;
-    }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public String getArtistName() {
-        return artistName;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 
     public String getFormattedDate() {
         try {

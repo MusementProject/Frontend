@@ -8,4 +8,11 @@
     </style>
 
     <style name="musement" parent="Base.Theme.MusementFrontend" />
+    <!-- Base application theme. -->
+    <style name="Base.Base.Theme.MusementFrontend" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowBackground">@color/dark_blue</item>
+        <item name="android:windowAnimationStyle">@anim/no_animation</item>
+    </style>
 </resources>

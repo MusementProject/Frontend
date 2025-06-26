@@ -21,8 +21,9 @@
 
         <ImageView
             android:id="@+id/avatar"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="150dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
             android:background="@null"
             android:layout_gravity="center_horizontal" />
 
@@ -36,16 +37,16 @@
             android:layout_gravity="center_horizontal"/>
 
         <TextView
-            android:id="@+id/nickname"
+            android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="\@nickname"
+            android:text="\username"
             android:textColor="@color/white"
             android:layout_marginTop="10dp"
             android:layout_gravity="center_horizontal"/>
 
         <TextView
-            android:id="@+id/username"
+            android:id="@+id/nickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="\@nickname"
@@ -55,67 +56,73 @@
 
         <LinearLayout
             android:id="@+id/userInfo"
-            android:layout_marginTop="20dp"
             android:layout_width="350dp"
-            android:layout_height="wrap_content"
+            android:layout_height="7dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:layout_weight="0.06"
             android:orientation="horizontal"
-            android:weightSum="4"
-            app:layout_constraintWidth_percent="0.6"
-            android:layout_gravity="center_horizontal" >
+            android:weightSum="2"
+            app:layout_constraintWidth_percent="0.6">
 
             <ImageButton
                 android:id="@+id/friends"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:src="@drawable/friends"
                 android:background="@null"
-                android:onClick="OnClickFriends"/>
-
-            <ImageButton
-                android:id="@+id/tickets"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/tickets"
-                android:background="@null"
-                android:onClick="OnClickTickets"/>
-
-            <ImageButton
-                android:id="@+id/playlists"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/playlists"
-                android:background="@null"
-                android:onClick="OnClickPlaylists"/>
+                android:onClick="OnClickFriends"
+                android:src="@drawable/friends" />
 
             <ImageButton
                 android:id="@+id/social_networks"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:src="@drawable/social_networks"
                 android:background="@null"
-                android:onClick="OnClickSocialNetworks"/>
+                android:onClick="OnClickSocialNetworks"
+                android:src="@drawable/social_networks" />
         </LinearLayout>
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@color/blue"
-            app:tabTextColor="@color/white"
-            app:tabSelectedTextColor="@color/light_blue"
-            app:tabIndicatorColor="@color/light_blue"/>
+            android:layout_gravity="center_horizontal"
+            android:text="add"
+            android:backgroundTint="@color/green"
+            android:textColor="@color/black"
+            android:onClick="onClickAddFriend"
+            />
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="delete"
+            android:backgroundTint="@color/light_gray"
+            android:textColor="@color/black"
+            android:onClick="onClickDeleteFriend"
+            />
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="320dp"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="10dp"/>
+            android:layout_weight="0.5"
+            android:layout_gravity="center_horizontal"
+            app:layout_constraintWidth_percent="0.6">
+
+            <include
+                android:id="@+id/feed_item"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                layout="@layout/feed"
+                app:layout_constraintTop_toTopOf="@id/header"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+        </ScrollView>
 
     </LinearLayout>
 

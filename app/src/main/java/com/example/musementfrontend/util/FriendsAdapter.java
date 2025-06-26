@@ -18,10 +18,17 @@ import java.util.List;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendViewHolder> {
 
+    public interface OnProfileClickListener {
+        void onProfileClick(FriendDTO friend);
+    }
+
     private final List<FriendDTO> friends;
 
-    public FriendsAdapter(List<FriendDTO> friends) {
+    private final OnProfileClickListener profileClickListener;
+
+    public FriendsAdapter(List<FriendDTO> friends, OnProfileClickListener listener) {
         this.friends = new ArrayList<>(friends);
+        this.profileClickListener = listener;
     }
 
     public void updateFriends(List<FriendDTO> newFriends) {
@@ -64,6 +71,12 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendVi
                 .load(profilePicture)
                 .circleCrop()
                 .into(holder.profilePicture);
+
+        holder.profilePicture.setOnClickListener(v -> {
+            if (profileClickListener != null){
+                profileClickListener.onProfileClick(friend);
+            }
+        });
     }
     @Override
     public int getItemCount() {

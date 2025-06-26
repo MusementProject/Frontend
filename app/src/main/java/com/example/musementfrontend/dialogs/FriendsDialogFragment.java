@@ -2,11 +2,13 @@ package com.example.musementfrontend.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SearchView;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.Friend;
+import com.example.musementfrontend.Login;
+import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.R;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.User;
@@ -33,10 +38,12 @@ public class FriendsDialogFragment extends DialogFragment {
     private FriendsAdapter adapter;
     private List<FriendDTO> friends = new ArrayList<>();
     private User user;
+    private SearchView search;
+    APIService apiService = APIClient.getClient().create(APIService.class);
 
-    public void setFriends(List<FriendDTO> friends){
+    public void setFriends(List<FriendDTO> friends) {
         this.friends = friends;
-        if (adapter != null){
+        if (adapter != null) {
             adapter.updateFriends(friends);
         }
     }
@@ -45,15 +52,21 @@ public class FriendsDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
-        if (args != null){
-            this.user = args.getParcelable(IntentKeys.getUSER_KEY(), User.class);
+        if (args != null) {
+            this.user = args.getParcelable(IntentKeys.getUSER(), User.class);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_friends, null);
         RecyclerView recyclerView = view.findViewById(R.id.friendsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FriendsAdapter(friends);
+        adapter = new FriendsAdapter(friends, friend -> {
+            dismiss();
+            Intent intent = new Intent(requireContext(), Friend.class);
+            intent.putExtra(IntentKeys.getUSER(), user);
+            intent.putExtra(IntentKeys.getFRIEND_USERNAME(), friend.getUsername());
+            startActivity(intent);
+        });
         recyclerView.setAdapter(adapter);
 
         AlertDialog dialog = builder
@@ -77,18 +90,48 @@ public class FriendsDialogFragment extends DialogFragment {
         Button followingButton = view.findViewById(R.id.followingButton);
         followingButton.setOnClickListener(this::OnClickFollowingButton);
 
+        search = view.findViewById(R.id.search);
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchUser(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
         OnClickFriendsButton(null);
         return dialog;
     }
 
-    public void OnClickFriendsButton(View view){
-        APIService apiService = APIClient.getClient().create(APIService.class);
+    public void searchUser(String query){
+        Call<List<FriendDTO>> call = apiService.searchByUsername("Bearer " + user.getAccessToken(), query);
+        call.enqueue(new Callback<List<FriendDTO>>() {
+            @Override
+            public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
+                if (response.isSuccessful() && response.body() != null){
+                    List<FriendDTO> friendDTOS = response.body();
+                    setFriends(friendDTOS);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FriendDTO>> call, Throwable t) {
+                Log.e("Search", "Couldn't execute search friends");
+            }
+        });
+    }
+
+    public void OnClickFriendsButton(View view) {
         Call<List<FriendDTO>> call = apiService.getAllUserFriends("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<FriendDTO>>() {
             @Override
             public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FriendDTO> friendList = response.body();
                     setFriends(friendList);
                 }
             }
@@ -100,14 +143,13 @@ public class FriendsDialogFragment extends DialogFragment {
         });
     }
 
-    public void OnClickFollowersButton(View view){
-        APIService apiService = APIClient.getClient().create(APIService.class);
+    public void OnClickFollowersButton(View view) {
         Call<List<FriendDTO>> call = apiService.getAllUserFollowers("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<FriendDTO>>() {
             @Override
             public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FriendDTO> friendList = response.body();
                     setFriends(friendList);
                 }
             }
@@ -119,14 +161,13 @@ public class FriendsDialogFragment extends DialogFragment {
         });
     }
 
-    public void OnClickFollowingButton(View view){
-        APIService apiService = APIClient.getClient().create(APIService.class);
+    public void OnClickFollowingButton(View view) {
         Call<List<FriendDTO>> call = apiService.getAllUserFollowing("Bearer " + user.getAccessToken(), user.getId());
         call.enqueue(new Callback<List<FriendDTO>>() {
             @Override
             public void onResponse(Call<List<FriendDTO>> call, Response<List<FriendDTO>> response) {
-                if(response.isSuccessful() && response.body() != null){
-                    List<FriendDTO> friendList= response.body();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FriendDTO> friendList = response.body();
                     setFriends(friendList);
                 }
             }

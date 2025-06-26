@@ -47,7 +47,7 @@ public class Util {
     static public User getUser(Intent intent){
         Bundle arguments = intent.getExtras();
         if (arguments != null){
-            return (User) arguments.get(IntentKeys.getUSER_KEY());
+            return (User) arguments.get(IntentKeys.getUSER());
         }
         return null;
     }

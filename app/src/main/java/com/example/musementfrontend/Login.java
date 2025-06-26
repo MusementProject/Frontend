@@ -158,7 +158,7 @@ public class Login extends AppCompatActivity {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setAccessToken(jwt);
-        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        intent.putExtra(IntentKeys.getUSER(), user);
 
         return intent;
     }
@@ -194,14 +194,14 @@ public class Login extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                             return;
                         }
-                        // Switch to Profile activity, passing UserDTO data
+
                         Intent intent = getIntent(result, jwt);
                         User user = new User();
                         user.setId(result.getId());
                         user.setEmail(result.getEmail());
-                        user.setUsername(result.getUsername());
+                        user.setUsername(result.getNickname());
                         user.setAccessToken(jwt);
-                        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+                        intent.putExtra(IntentKeys.getUSER(), user);
                         startActivity(intent);
                         finish();
                     } else {

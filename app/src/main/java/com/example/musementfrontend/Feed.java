@@ -76,13 +76,12 @@ public class Feed extends AppCompatActivity {
                 currentCall = null;
                 if (response.isSuccessful() && response.body() != null) {
                     List<ConcertDTO> concertDTOs = response.body();
-                    List<Concert> concerts = UtilFeed.convertConcertDTOsToConcerts(concertDTOs);
                     View feedItem = findViewById(R.id.feed_item);
                     if (feedItem != null) {
                         LinearLayout feed = feedItem.findViewById(R.id.feed);
                         if (feed != null) {
                             feed.removeAllViews();
-                            UtilFeed.FillFeedConcert(Feed.this, concerts);
+                            UtilFeed.FillFeedConcert(Feed.this, concertDTOs);
                         } else {
                             Toast.makeText(Feed.this, "Error: feed not found", Toast.LENGTH_LONG).show();
                         }

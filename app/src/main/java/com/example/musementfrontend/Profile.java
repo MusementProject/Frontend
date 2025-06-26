@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.dialogs.FriendsDialogFragment;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.dto.UserDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
@@ -63,7 +64,7 @@ public class Profile extends AppCompatActivity {
         Bundle arguments = getIntent().getExtras();
         user = null;
         if (arguments != null) {
-            user = (User) arguments.get(IntentKeys.getUSER_KEY());
+            user = (User) arguments.get(IntentKeys.getUSER());
         }
 
         profileSettingsLauncher = registerForActivityResult(
@@ -72,16 +73,19 @@ public class Profile extends AppCompatActivity {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
 
+                        // fields that can be changed by the user
                         String newUsername = data.getStringExtra("username");
                         String newBio = data.getStringExtra("bio");
                         String newNick = data.getStringExtra("nickname");
                         String newAvatar = data.getStringExtra("profilePicture");
 
+                        // update userDTO
                         userDTO.setUsername(newUsername);
                         userDTO.setBio(newBio);
                         userDTO.setNickname(newNick);
                         userDTO.setProfilePicture(newAvatar);
 
+                        // update UI
                         username.setText(
                                 getString(R.string.username_handle, userDTO.getUsername())
                         );
@@ -91,11 +95,13 @@ public class Profile extends AppCompatActivity {
                 }
         );
 
+        // 1) init API + get token + userId
         api = APIClient.getClient().create(APIService.class);
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("accessToken");
         userId = intent.getLongExtra("userId", 0L);
 
+        // 2) prepare UserDTO from intent
         userDTO = new UserDTO(
                 intent.getStringExtra("username"),
                 intent.getStringExtra("email"),
@@ -104,6 +110,7 @@ public class Profile extends AppCompatActivity {
                 null
         );
 
+        // 3) find views and set data
         username = findViewById(R.id.username);
         nickname = findViewById(R.id.nickname);
         avatar = findViewById(R.id.avatar);
@@ -138,12 +145,14 @@ public class Profile extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             User serverUser = response.body();
 
+                            // update userDTO from server
                             userDTO.setUsername(serverUser.getUsername());
                             userDTO.setEmail(serverUser.getEmail());
                             userDTO.setBio(serverUser.getBio());
                             userDTO.setNickname(serverUser.getNickname());
                             userDTO.setProfilePicture(serverUser.getProfilePicture());
 
+                            // update UI
                             username.setText(
                                     getString(R.string.username_handle, userDTO.getUsername())
                             );
@@ -176,6 +185,7 @@ public class Profile extends AppCompatActivity {
                     }
                 });
 
+        // set up menu buttons
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
             MenuInflater inflater = menu.getMenuInflater();
@@ -205,7 +215,7 @@ public class Profile extends AppCompatActivity {
         if (viewPager != null && viewPager.getAdapter() != null) {
             ProfilePagerAdapter newAdapter = new ProfilePagerAdapter(this, accessToken, userId);
             viewPager.setAdapter(newAdapter);
-            
+
             int currentItem = viewPager.getCurrentItem();
             viewPager.setCurrentItem(currentItem);
         }
@@ -223,6 +233,23 @@ public class Profile extends AppCompatActivity {
         intentSettings.putExtra("userId", userId);
         return intentSettings;
     }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        // update UI with user data
+//        if (userDTO != null) {
+//            username.setText(
+//                    getString(R.string.username_handle, userDTO.getUsername())
+//            );
+//            nickname.setText(userDTO.getNickname());
+//            setUserAvatar();
+//        }
+//
+//        // Load concerts when activity resumes
+//        loadAttendingConcerts();
+//    }
 
     private void setUserAvatar() {
         String url = userDTO.getProfilePicture();
@@ -253,10 +280,44 @@ public class Profile extends AppCompatActivity {
         }
     }
 
+    private void showLoading(String message) {
+        TextView loadingText = findViewById(R.id.loading_text);
+        loadingText.setText(message);
+        loadingText.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        TextView loadingText = findViewById(R.id.loading_text);
+        loadingText.setVisibility(View.GONE);
+    }
+
+    private void loadAttendingConcerts() {
+        // showLoading("Loading concerts...");
+        User user = Util.getUser(getIntent());
+        if (user == null) return;
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        Call<List<ConcertDTO>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
+        call.enqueue(new Callback<List<ConcertDTO>>() {
+            @Override
+            public void onResponse(Call<List<ConcertDTO>> call, Response<List<ConcertDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UtilFeed.FillProfileConcerts(Profile.this, response.body());
+                    hideLoading();
+                } else {
+                    showLoading("Failed to load concerts");
+                }
+            }
+            @Override
+            public void onFailure(Call<List<ConcertDTO>> call, Throwable t) {
+                showLoading("Failed to load concerts");
+            }
+        });
+    }
+
     public void OnClickFriends(View view) {
         FriendsDialogFragment dialog = new FriendsDialogFragment();
         Bundle args = new Bundle();
-        args.putParcelable(IntentKeys.getUSER_KEY(), user);
+        args.putParcelable(IntentKeys.getUSER(), user);
         dialog.setArguments(args);
         dialog.show(getSupportFragmentManager(), "friends");
     }
@@ -264,7 +325,8 @@ public class Profile extends AppCompatActivity {
     public void OnClickTickets(View view) {
         Intent intent = new Intent(this, Tickets.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        intent.putExtra(IntentKeys.getUSER(), user);
+
         UtilButtons.fillIntent(intent, user);
         Log.d("Profile", "########## Opening Tickets activity with user: " + user);
         startActivity(intent);
@@ -273,12 +335,11 @@ public class Profile extends AppCompatActivity {
     public void OnClickPlaylists(View view) {
         Intent intent = new Intent(this, Playlists.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra(IntentKeys.getUSER_KEY(), user);
+        intent.putExtra(IntentKeys.getUSER(), user);
         UtilButtons.fillIntent(intent, user);
         startActivity(intent);
     }
 
     public void OnClickSocialNetworks(View view) {}
-
     public void OnClickProfileSettings(View view) {}
 }
