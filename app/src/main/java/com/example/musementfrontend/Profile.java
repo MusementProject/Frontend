@@ -15,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
@@ -31,6 +32,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,6 +52,8 @@ public class Profile extends AppCompatActivity {
     private ActivityResultLauncher<Intent> profileSettingsLauncher;
     private String accessToken;
     private long userId;
+    private ViewPager2 viewPager;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,19 +72,16 @@ public class Profile extends AppCompatActivity {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
 
-                        // fields that can be changed by the user
                         String newUsername = data.getStringExtra("username");
                         String newBio = data.getStringExtra("bio");
                         String newNick = data.getStringExtra("nickname");
                         String newAvatar = data.getStringExtra("profilePicture");
 
-                        // update userDTO
                         userDTO.setUsername(newUsername);
                         userDTO.setBio(newBio);
                         userDTO.setNickname(newNick);
                         userDTO.setProfilePicture(newAvatar);
 
-                        // update UI
                         username.setText(
                                 getString(R.string.username_handle, userDTO.getUsername())
                         );
@@ -89,13 +91,11 @@ public class Profile extends AppCompatActivity {
                 }
         );
 
-        // 1) init API + get token + userId
         api = APIClient.getClient().create(APIService.class);
         Intent intent = getIntent();
         accessToken = intent.getStringExtra("accessToken");
         userId = intent.getLongExtra("userId", 0L);
 
-        // 2) prepare UserDTO from intent
         userDTO = new UserDTO(
                 intent.getStringExtra("username"),
                 intent.getStringExtra("email"),
@@ -104,11 +104,12 @@ public class Profile extends AppCompatActivity {
                 null
         );
 
-        // 3) find views and set data
         username = findViewById(R.id.username);
         nickname = findViewById(R.id.nickname);
         avatar = findViewById(R.id.avatar);
         ImageButton settings = findViewById(R.id.settings);
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
 
         username.setText(
                 getString(R.string.username_handle, userDTO.getUsername())
@@ -116,7 +117,20 @@ public class Profile extends AppCompatActivity {
         nickname.setText(userDTO.getNickname());
         setUserAvatar();
 
-        // 4) load fresh user data from server
+        ProfilePagerAdapter pagerAdapter = new ProfilePagerAdapter(this, accessToken, userId);
+        viewPager.setAdapter(pagerAdapter);
+
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            switch (position) {
+                case 0:
+                    tab.setText("Attending");
+                    break;
+                case 1:
+                    tab.setText("Wishlist");
+                    break;
+            }
+        }).attach();
+
         api.getCurrentUser("Bearer " + accessToken)
                 .enqueue(new Callback<User>() {
                     @Override
@@ -124,14 +138,12 @@ public class Profile extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             User serverUser = response.body();
 
-                            // update userDTO from server
                             userDTO.setUsername(serverUser.getUsername());
                             userDTO.setEmail(serverUser.getEmail());
                             userDTO.setBio(serverUser.getBio());
                             userDTO.setNickname(serverUser.getNickname());
                             userDTO.setProfilePicture(serverUser.getProfilePicture());
 
-                            // update UI
                             username.setText(
                                     getString(R.string.username_handle, userDTO.getUsername())
                             );
@@ -164,7 +176,6 @@ public class Profile extends AppCompatActivity {
                     }
                 });
 
-        // set up menu buttons
         settings.setOnClickListener(view -> {
             PopupMenu menu = new PopupMenu(this, view);
             MenuInflater inflater = menu.getMenuInflater();
@@ -188,6 +199,18 @@ public class Profile extends AppCompatActivity {
         Log.d("token", accessToken);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (viewPager != null && viewPager.getAdapter() != null) {
+            ProfilePagerAdapter newAdapter = new ProfilePagerAdapter(this, accessToken, userId);
+            viewPager.setAdapter(newAdapter);
+            
+            int currentItem = viewPager.getCurrentItem();
+            viewPager.setCurrentItem(currentItem);
+        }
+    }
+
     @NonNull
     private Intent getIntentSettings() {
         Intent intentSettings = new Intent(Profile.this, ProfileSettings.class);
@@ -199,23 +222,6 @@ public class Profile extends AppCompatActivity {
         intentSettings.putExtra("accessToken", accessToken);
         intentSettings.putExtra("userId", userId);
         return intentSettings;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // update UI with user data
-        if (userDTO != null) {
-            username.setText(
-                    getString(R.string.username_handle, userDTO.getUsername())
-            );
-            nickname.setText(userDTO.getNickname());
-            setUserAvatar();
-        }
-
-        // Load concerts when activity resumes
-        loadAttendingConcerts();
     }
 
     private void setUserAvatar() {
@@ -247,38 +253,6 @@ public class Profile extends AppCompatActivity {
         }
     }
 
-    private void showLoading(String message) {
-        TextView loadingText = findViewById(R.id.loading_text);
-        loadingText.setText(message);
-        loadingText.setVisibility(View.VISIBLE);
-    }
-
-    private void hideLoading() {
-        TextView loadingText = findViewById(R.id.loading_text);
-        loadingText.setVisibility(View.GONE);
-    }
-
-    private void loadAttendingConcerts() {        User user = Util.getUser(getIntent());
-        if (user == null) return;
-        APIService apiService = APIClient.getClient().create(APIService.class);
-        Call<List<Concert>> call = apiService.getAttendingConcerts("Bearer " + user.getAccessToken(), user.getId());
-        call.enqueue(new Callback<List<Concert>>() {
-            @Override
-            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    UtilFeed.FillProfileConcerts(Profile.this, response.body());
-                    hideLoading();
-                } else {
-                    showLoading("Failed to load concerts");
-                }
-            }
-            @Override
-            public void onFailure(Call<List<Concert>> call, Throwable t) {
-                showLoading("Failed to load concerts");
-            }
-        });
-    }
-
     public void OnClickFriends(View view) {
         FriendsDialogFragment dialog = new FriendsDialogFragment();
         Bundle args = new Bundle();
@@ -305,5 +279,6 @@ public class Profile extends AppCompatActivity {
     }
 
     public void OnClickSocialNetworks(View view) {}
+
     public void OnClickProfileSettings(View view) {}
 }

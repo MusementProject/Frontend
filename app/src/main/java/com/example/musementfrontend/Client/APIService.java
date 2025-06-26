@@ -65,6 +65,33 @@ public interface APIService {
             @Query("concertId") Long concertId
     );
 
+    @POST("/api/concerts/wishlist")
+    Call<Void> addToWishlist(
+            @Header("Authorization") String authHeader,
+            @Query("userId") Long userId,
+            @Query("concertId") Long concertId
+    );
+
+    @DELETE("/api/concerts/wishlist")
+    Call<Void> removeFromWishlist(
+            @Header("Authorization") String authHeader,
+            @Query("userId") Long userId,
+            @Query("concertId") Long concertId
+    );
+
+    @GET("/api/concerts/wishlist/{userId}")
+    Call<List<Concert>> getWishlistConcerts(@Header("Authorization") String authHeader, @Path("userId") Long userId);
+
+    @GET("/api/concerts/{concertId}/wishlist_user/{userId}")
+    Call<Boolean> isUserWishlistingConcert(@Header("Authorization") String authHeader, @Path("concertId") Long concertId, @Path("userId") Long userId);
+
+    @POST("/api/concerts/wishlist_to_attending")
+    Call<Void> moveFromWishlistToAttending(
+            @Header("Authorization") String authHeader,
+            @Query("userId") Long userId,
+            @Query("concertId") Long concertId
+    );
+
     @PATCH("/api/users/{id}")
     Call<UserDTO> updateUser(@Header("Authorization") String authHeader, @Path("id") long id, @Body UserDTO request);
 

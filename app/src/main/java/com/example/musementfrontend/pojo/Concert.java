@@ -11,6 +11,7 @@ public class Concert {
     private String location;
     private String date;
     private boolean attending;
+    private boolean wishlisted;
 
     public Concert() {
     }
@@ -94,5 +95,13 @@ public class Concert {
 
     public void setAttending(boolean attending) {
         this.attending = attending;
+    }
+
+    public boolean isWishlisted() {
+        return wishlisted;
+    }
+
+    public void setWishlisted(boolean wishlisted) {
+        this.wishlisted = wishlisted;
     }
 }
