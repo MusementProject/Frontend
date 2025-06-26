@@ -1,9 +1,6 @@
-package com.example.musementfrontend.pojo;
-
-import com.example.musementfrontend.dto.User;
+package com.example.musementfrontend.dto;
 
 import java.util.Date;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,10 +11,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment {
-    private User user;
+public class AddCommentRequestDTO {
+    private Long userId;
+    private Long concertId;
     private String message;
     private Date time;
-    private String attachedPicture;
-    private List<String> tags;
 }

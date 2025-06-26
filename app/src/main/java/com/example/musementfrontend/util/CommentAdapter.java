@@ -82,4 +82,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             tvCommentText = itemView.findViewById(R.id.tvCommentText);
         }
     }
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+        notifyItemInserted(comments.size() - 1);
+    }
 }

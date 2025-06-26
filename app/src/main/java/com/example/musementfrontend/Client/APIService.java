@@ -1,5 +1,6 @@
 package com.example.musementfrontend.Client;
 
+import com.example.musementfrontend.dto.AddCommentRequestDTO;
 import com.example.musementfrontend.dto.PlaylistResponseDTO;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.ImageResponseDTO;
@@ -112,4 +113,7 @@ public interface APIService {
 
     @GET("api/comment/getAll/{userId}/{concertId}")
     Call<List<Comment>> getConcertComments(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("concertId") Long concertId);
+
+    @POST("api/comment/add")
+    Call<Comment> addComment(@Header("Authorization") String authHeader, @Body AddCommentRequestDTO commentRequest);
 }
