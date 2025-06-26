@@ -3,8 +3,6 @@ package com.example.musementfrontend.pojo;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import lombok.Setter;
-
 public class Concert {
     @Setter
     private Long id;
@@ -14,6 +12,7 @@ public class Concert {
     private String location;
     private String date;
     private boolean attending;
+    private boolean wishlisted;
 
     public Concert() {}
 
@@ -53,6 +52,25 @@ public class Concert {
         }
     }
 
-    public boolean isAttending() { return attending; }
-    public void setAttending(boolean attending) { this.attending = attending; }
+    @Override
+    public String toString() {
+        // name + location + date
+        return artistName + " @ " + location + " — " + getFormattedDate();
+    }
+
+    public boolean isAttending() {
+        return attending;
+    }
+
+    public void setAttending(boolean attending) {
+        this.attending = attending;
+    }
+
+    public boolean isWishlisted() {
+        return wishlisted;
+    }
+
+    public void setWishlisted(boolean wishlisted) {
+        this.wishlisted = wishlisted;
+    }
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose a concert to upload a ticket"
+        android:textStyle="bold"/>
+
+    <Spinner
+        android:id="@+id/spinnerConcerts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnPickFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose ticket file"
+        android:layout_marginTop="12dp"/>
+
+    <Button
+        android:id="@+id/btnUpload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Ticket"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

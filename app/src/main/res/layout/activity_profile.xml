@@ -21,9 +21,8 @@
 
         <ImageView
             android:id="@+id/avatar"
-            android:layout_width="150dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.2"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:background="@null"
             android:layout_gravity="center_horizontal" />
 
@@ -37,7 +36,7 @@
             android:layout_gravity="center_horizontal"/>
 
         <TextView
-            android:id="@+id/username"
+            android:id="@+id/nickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="\@nickname"
@@ -46,7 +45,7 @@
             android:layout_gravity="center_horizontal"/>
 
         <TextView
-            android:id="@+id/nickname"
+            android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="\@nickname"
@@ -56,10 +55,9 @@
 
         <LinearLayout
             android:id="@+id/userInfo"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:layout_width="350dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.1"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="4"
             app:layout_constraintWidth_percent="0.6"
@@ -102,37 +100,22 @@
                 android:onClick="OnClickSocialNetworks"/>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/loading_text"
-            android:layout_width="wrap_content"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Loading concerts..."
-            android:textColor="@color/light_blue"
-            android:textSize="20sp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/header"
-            app:layout_constraintBottom_toTopOf="@id/main_menu"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.1"/>
+            android:layout_marginTop="20dp"
+            android:background="@color/blue"
+            app:tabTextColor="@color/white"
+            app:tabSelectedTextColor="@color/light_blue"
+            app:tabIndicatorColor="@color/light_blue"/>
 
-        <ScrollView
-            android:id="@+id/scroll"
-            android:layout_width="320dp"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.5"
-            android:layout_gravity="center_horizontal"
-            app:layout_constraintWidth_percent="0.6">
-
-            <include
-                android:id="@+id/feed_item"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                layout="@layout/feed"
-                app:layout_constraintTop_toTopOf="@id/header"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
-        </ScrollView>
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"/>
 
     </LinearLayout>
 

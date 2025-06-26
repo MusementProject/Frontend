@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.Util;
@@ -25,7 +26,7 @@ import retrofit2.Response;
 public class Feed extends AppCompatActivity {
     private View loadingText;
     private boolean isLoading = false;
-    private Call<List<Concert>> currentCall;
+    private Call<List<ConcertDTO>> currentCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +69,14 @@ public class Feed extends AppCompatActivity {
         }
         APIService apiService = APIClient.getClient().create(APIService.class);
         currentCall = apiService.getConcertFeed("Bearer " + user.getAccessToken(), user.getId());
-        currentCall.enqueue(new Callback<List<Concert>>() {
+        currentCall.enqueue(new Callback<List<ConcertDTO>>() {
             @Override
-            public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
+            public void onResponse(Call<List<ConcertDTO>> call, Response<List<ConcertDTO>> response) {
                 isLoading = false;
                 currentCall = null;
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Concert> concerts = response.body();
+                    List<ConcertDTO> concertDTOs = response.body();
+                    List<Concert> concerts = UtilFeed.convertConcertDTOsToConcerts(concertDTOs);
                     View feedItem = findViewById(R.id.feed_item);
                     if (feedItem != null) {
                         LinearLayout feed = feedItem.findViewById(R.id.feed);
@@ -93,7 +95,7 @@ public class Feed extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Concert>> call, Throwable t) {
+            public void onFailure(Call<List<ConcertDTO>> call, Throwable t) {
                 isLoading = false;
                 currentCall = null;
                 Toast.makeText(Feed.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
