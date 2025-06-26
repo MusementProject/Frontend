@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.Profile;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
@@ -27,6 +28,7 @@ import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -373,5 +375,23 @@ public class UtilFeed {
 
             feed.addView(concertView);
         }
+    }
+
+    public static List<Concert> convertConcertDTOsToConcerts(List<ConcertDTO> concertDTOs) {
+        List<Concert> concerts = new ArrayList<>();
+        for (ConcertDTO dto : concertDTOs) {
+            Concert concert = new Concert(
+                dto.getId().intValue(),
+                dto.getArtistId().intValue(),
+                dto.getArtistName(),
+                dto.getImageUrl(),
+                dto.getLocation(),
+                dto.getDate(),
+                dto.isAttending(),
+                dto.isWishlisted()
+            );
+            concerts.add(concert);
+        }
+        return concerts;
     }
 }

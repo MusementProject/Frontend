@@ -53,10 +53,10 @@ public interface APIService {
     Call<PlaylistResponseDTO> getPlaylistStats(@Header("Authorization") String authHeader, @Path("playlistId") Long playlistId);
 
     @GET("/api/concerts/feed/{userId}")
-    Call<List<Concert>> getConcertFeed(@Header("Authorization") String authHeader, @Path("userId") Long userId);
+    Call<List<ConcertDTO>> getConcertFeed(@Header("Authorization") String authHeader, @Path("userId") Long userId);
 
     @GET("/api/concerts/attending/{userId}")
-    Call<List<Concert>> getAttendingConcerts(@Header("Authorization") String authHeader, @Path("userId") Long userId);
+    Call<List<ConcertDTO>> getAttendingConcerts(@Header("Authorization") String authHeader, @Path("userId") Long userId);
 
     @POST("/api/concerts/attend")
     Call<Void> attendConcert(
@@ -80,7 +80,7 @@ public interface APIService {
     );
 
     @GET("/api/concerts/wishlist/{userId}")
-    Call<List<Concert>> getWishlistConcerts(@Header("Authorization") String authHeader, @Path("userId") Long userId);
+    Call<List<ConcertDTO>> getWishlistConcerts(@Header("Authorization") String authHeader, @Path("userId") Long userId);
 
     @GET("/api/concerts/{concertId}/wishlist_user/{userId}")
     Call<Boolean> isUserWishlistingConcert(@Header("Authorization") String authHeader, @Path("concertId") Long concertId, @Path("userId") Long userId);

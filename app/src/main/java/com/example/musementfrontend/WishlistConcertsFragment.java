@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
-import com.example.musementfrontend.dto.User;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.pojo.Concert;
 import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.util.UtilFeed;
@@ -52,24 +52,22 @@ public class WishlistConcertsFragment extends Fragment {
         }
 
         APIService apiService = APIClient.getClient().create(APIService.class);
-        apiService.getWishlistConcerts("Bearer " + accessToken, userId)
-                .enqueue(new Callback<List<Concert>>() {
-                    @Override
-                    public void onResponse(Call<List<Concert>> call, Response<List<Concert>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<Concert> concerts = response.body();
-                            if (getActivity() != null) {
-                                UtilFeed.FillWishlistConcertsForFragment((AppCompatActivity) getActivity(), concerts, feed);
-                            }
-                        } else {
-                            Toast.makeText(getContext(), "Error loading wishlist: " + response.code(), Toast.LENGTH_LONG).show();
-                        }
-                    }
+        apiService.getWishlistConcerts("Bearer " + accessToken, userId).enqueue(new Callback<List<ConcertDTO>>() {
+            @Override
+            public void onResponse(Call<List<ConcertDTO>> call, Response<List<ConcertDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ConcertDTO> concertDTOs = response.body();
+                    List<Concert> concerts = UtilFeed.convertConcertDTOsToConcerts(concertDTOs);
+                    UtilFeed.FillWishlistConcertsForFragment((AppCompatActivity) requireActivity(), concerts, feed);
+                } else {
+                    Toast.makeText(getContext(), "Error loading concerts: " + response.code(), Toast.LENGTH_LONG).show();
+                }
+            }
 
-                    @Override
-                    public void onFailure(Call<List<Concert>> call, Throwable t) {
-                        Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+            @Override
+            public void onFailure(Call<List<ConcertDTO>> call, Throwable t) {
+                Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 } 
