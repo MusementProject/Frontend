@@ -1,6 +1,7 @@
 package com.example.musementfrontend.Client;
 
 import com.example.musementfrontend.dto.ConcertDTO;
+import com.example.musementfrontend.dto.FriendConcertDTO;
 import com.example.musementfrontend.dto.FriendDTO;
 import com.example.musementfrontend.dto.ImageResponseDTO;
 import com.example.musementfrontend.dto.PlaylistResponseDTO;
@@ -152,5 +153,12 @@ public interface APIService {
     Call<Void> deleteTicket(
             @Header("Authorization") String authHeader,
             @Path("id") long ticketId
+    );
+
+    @GET("/api/concerts/{concertId}/friends/{userId}")
+    Call<List<FriendConcertDTO>> getFriendsOnConcert(
+            @Header("Authorization") String authHeader,
+            @Path("concertId") Long concertId,
+            @Path("userId") Long userId
     );
 }

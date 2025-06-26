@@ -1,11 +1,13 @@
 package com.example.musementfrontend.util;
 
+import android.app.AlertDialog;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -20,6 +22,7 @@ import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
 import com.example.musementfrontend.Profile;
 import com.example.musementfrontend.dto.ConcertDTO;
+import com.example.musementfrontend.dto.FriendConcertDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
@@ -81,7 +84,8 @@ public class UtilFeed {
             concertView.setLayoutParams(params);
             Button btnGoing = concertView.findViewById(R.id.btn_im_going);
             Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
-            if (btnGoing == null || btnWantToGo == null) {
+            Button btnFriends = concertView.findViewById(R.id.btn_friends);
+            if (btnGoing == null || btnWantToGo == null || btnFriends == null) {
                 continue;
             }
             
@@ -138,6 +142,10 @@ public class UtilFeed {
                     });
                 });
             }
+            
+            btnFriends.setOnClickListener(v -> {
+                showFriendsDialog(activity, concert);
+            });
             feed.addView(concertView);
         }
     }
@@ -206,7 +214,8 @@ public class UtilFeed {
 
             Button btnGoing = concertView.findViewById(R.id.btn_im_going);
             Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
-            if (btnGoing != null && btnWantToGo != null) {
+            Button btnFriends = concertView.findViewById(R.id.btn_friends);
+            if (btnGoing != null && btnWantToGo != null && btnFriends != null) {
                 btnWantToGo.setVisibility(View.GONE);
                 btnGoing.setText("I'm going!");
                 btnGoing.setOnClickListener(v -> {
@@ -229,6 +238,10 @@ public class UtilFeed {
                         public void onFailure(Call<Void> call, Throwable t) {
                         }
                     });
+                });
+                
+                btnFriends.setOnClickListener(v -> {
+                    showFriendsDialog(activity, concert);
                 });
             }
 
@@ -300,7 +313,8 @@ public class UtilFeed {
 
             Button btnGoing = concertView.findViewById(R.id.btn_im_going);
             Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
-            if (btnGoing != null && btnWantToGo != null) {
+            Button btnFriends = concertView.findViewById(R.id.btn_friends);
+            if (btnGoing != null && btnWantToGo != null && btnFriends != null) {
                 btnWantToGo.setVisibility(View.GONE);
                 btnGoing.setText("I'm going!");
                 btnGoing.setOnClickListener(v -> {
@@ -330,6 +344,10 @@ public class UtilFeed {
                             }
                         });
                     }
+                });
+                
+                btnFriends.setOnClickListener(v -> {
+                    showFriendsDialog(activity, concert);
                 });
             }
 
@@ -393,5 +411,115 @@ public class UtilFeed {
             concerts.add(concert);
         }
         return concerts;
+    }
+
+    private static void showFriendsDialog(AppCompatActivity activity, Concert concert) {
+        User user = Util.getUser(activity.getIntent());
+        if (user == null) {
+            Toast.makeText(activity, "Error: User not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_friends_on_concert, null);
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        APIService apiService = APIClient.getClient().create(APIService.class);
+        apiService.getFriendsOnConcert("Bearer " + user.getAccessToken(), (long) concert.getId(), user.getId())
+                .enqueue(new Callback<List<FriendConcertDTO>>() {
+                    @Override
+                    public void onResponse(Call<List<FriendConcertDTO>> call, Response<List<FriendConcertDTO>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            populateFriendsDialog(dialogView, response.body());
+                        } else {
+                            Toast.makeText(activity, "Error loading friends: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<FriendConcertDTO>> call, Throwable t) {
+                        Toast.makeText(activity, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private static void populateFriendsDialog(View dialogView, List<FriendConcertDTO> friends) {
+        LinearLayout attendingContainer = dialogView.findViewById(R.id.attending_friends_container);
+        LinearLayout wishlistedContainer = dialogView.findViewById(R.id.wishlisted_friends_container);
+        TextView tvAttending = dialogView.findViewById(R.id.tv_attending);
+        TextView tvWishlisted = dialogView.findViewById(R.id.tv_wishlisted);
+
+        attendingContainer.removeAllViews();
+        wishlistedContainer.removeAllViews();
+
+        List<FriendConcertDTO> attendingFriends = new ArrayList<>();
+        List<FriendConcertDTO> wishlistedFriends = new ArrayList<>();
+
+        for (FriendConcertDTO friend : friends) {
+            if (friend.isAttending()) {
+                attendingFriends.add(friend);
+            } else if (friend.isWishlisted()) {
+                wishlistedFriends.add(friend);
+            }
+        }
+
+        if (attendingFriends.isEmpty()) {
+            tvAttending.setVisibility(View.GONE);
+            attendingContainer.setVisibility(View.GONE);
+        } else {
+            tvAttending.setVisibility(View.VISIBLE);
+            attendingContainer.setVisibility(View.VISIBLE);
+            for (FriendConcertDTO friend : attendingFriends) {
+                View friendView = createFriendView(dialogView.getContext(), friend, true);
+                attendingContainer.addView(friendView);
+            }
+        }
+
+        if (wishlistedFriends.isEmpty()) {
+            tvWishlisted.setVisibility(View.GONE);
+            wishlistedContainer.setVisibility(View.GONE);
+        } else {
+            tvWishlisted.setVisibility(View.VISIBLE);
+            wishlistedContainer.setVisibility(View.VISIBLE);
+            for (FriendConcertDTO friend : wishlistedFriends) {
+                View friendView = createFriendView(dialogView.getContext(), friend, false);
+                wishlistedContainer.addView(friendView);
+            }
+        }
+
+        if (attendingFriends.isEmpty() && wishlistedFriends.isEmpty()) {
+            TextView noFriendsText = new TextView(dialogView.getContext());
+            noFriendsText.setText("No friends on this concert yet");
+            noFriendsText.setGravity(android.view.Gravity.CENTER);
+            noFriendsText.setPadding(0, 32, 0, 32);
+            attendingContainer.addView(noFriendsText);
+        }
+    }
+
+    private static View createFriendView(android.content.Context context, FriendConcertDTO friend, boolean isAttending) {
+        View friendView = android.view.LayoutInflater.from(context).inflate(R.layout.item_friend_concert, null);
+        
+        ImageView avatar = friendView.findViewById(R.id.friend_avatar);
+        TextView name = friendView.findViewById(R.id.friend_name);
+        TextView status = friendView.findViewById(R.id.friend_status);
+
+        name.setText(friend.getUsername());
+        
+        if (friend.getProfileImageUrl() != null && !friend.getProfileImageUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(friend.getProfileImageUrl())
+                    .placeholder(R.drawable.ic_person)
+                    .into(avatar);
+        }
+
+        if (isAttending) {
+            status.setText("Attending");
+            status.setBackgroundResource(R.drawable.status_attending_background);
+        } else {
+            status.setText("Want to go");
+            status.setBackgroundResource(R.drawable.status_want_to_go_background);
+        }
+
+        return friendView;
     }
 }
