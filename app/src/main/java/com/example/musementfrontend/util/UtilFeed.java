@@ -18,6 +18,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.bumptech.glide.Glide;
 import com.example.musementfrontend.Client.APIClient;
 import com.example.musementfrontend.Client.APIService;
+import com.example.musementfrontend.Profile;
+import com.example.musementfrontend.dto.ConcertDTO;
 import com.example.musementfrontend.dto.User;
 import com.example.musementfrontend.pojo.AttendConcertRequest;
 import com.example.musementfrontend.pojo.Concert;
@@ -26,6 +28,7 @@ import com.example.musementfrontend.util.Util;
 import com.example.musementfrontend.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -77,15 +80,23 @@ public class UtilFeed {
             params.setMargins(0, 40, 0, 40);
             concertView.setLayoutParams(params);
             Button btnGoing = concertView.findViewById(R.id.btn_im_going);
-            if (btnGoing == null) {
+            Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
+            if (btnGoing == null || btnWantToGo == null) {
                 continue;
             }
+            
             if (concert.isAttending()) {
                 btnGoing.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+                btnGoing.setEnabled(false);
+                btnWantToGo.setEnabled(false);
+            } else if (concert.isWishlisted()) {
+                btnWantToGo.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+                btnWantToGo.setEnabled(false);
                 btnGoing.setEnabled(false);
             } else {
                 btnGoing.setOnClickListener(v -> {
                     btnGoing.setEnabled(false);
+                    btnWantToGo.setEnabled(false);
                     Toast.makeText(activity, "Will be added to your profile soon!", Toast.LENGTH_SHORT).show();
                     User user = Util.getUser(activity.getIntent());
                     if (user == null) {
@@ -97,6 +108,28 @@ public class UtilFeed {
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
                                 btnGoing.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                        }
+                    });
+                });
+                
+                btnWantToGo.setOnClickListener(v -> {
+                    btnWantToGo.setEnabled(false);
+                    btnGoing.setEnabled(false);
+                    Toast.makeText(activity, "Added to wishlist!", Toast.LENGTH_SHORT).show();
+                    User user = Util.getUser(activity.getIntent());
+                    if (user == null) {
+                        return;
+                    }
+                    APIService apiService = APIClient.getClient().create(APIService.class);
+                    apiService.addToWishlist("Bearer " + user.getAccessToken(), user.getId(), (long) concert.getId()).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                btnWantToGo.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
                             }
                         }
                         @Override
@@ -140,5 +173,225 @@ public class UtilFeed {
 
             feed.addView(concertView);
         }
+    }
+
+    public static void FillWishlistConcerts(AppCompatActivity activity, List<Concert> concerts) {
+        ScrollView scroll = activity.findViewById(R.id.scroll);
+        ConstraintLayout layout = scroll.findViewById(R.id.feed_item);
+        LinearLayout feed = layout.findViewById(R.id.feed);
+
+        feed.removeAllViews();
+
+        if (concerts == null || concerts.isEmpty()) {
+            return;
+        }
+
+        for (Concert concert : concerts) {
+            View concertView = activity.getLayoutInflater().inflate(R.layout.concert_item_for_feed, feed, false);
+            ImageButton concertImage = concertView.findViewById(R.id.concert);
+            Glide.with(activity)
+                    .load(concert.getImageUrl())
+                    .into(concertImage);
+            TextView artist = concertView.findViewById(R.id.artist);
+            TextView location = concertView.findViewById(R.id.location);
+            TextView date = concertView.findViewById(R.id.date);
+
+            artist.setText(concert.getArtistName());
+            location.setText(concert.getLocation());
+            date.setText(concert.getFormattedDate());
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
+            params.setMargins(0, 40, 0, 40);
+            concertView.setLayoutParams(params);
+
+            Button btnGoing = concertView.findViewById(R.id.btn_im_going);
+            Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
+            if (btnGoing != null && btnWantToGo != null) {
+                btnWantToGo.setVisibility(View.GONE);
+                btnGoing.setText("I'm going!");
+                btnGoing.setOnClickListener(v -> {
+                    btnGoing.setEnabled(false);
+                    Toast.makeText(activity, "Moving to attending!", Toast.LENGTH_SHORT).show();
+                    User user = Util.getUser(activity.getIntent());
+                    if (user == null) {
+                        return;
+                    }
+                    APIService apiService = APIClient.getClient().create(APIService.class);
+                    apiService.moveFromWishlistToAttending("Bearer " + user.getAccessToken(), user.getId(), (long) concert.getId()).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                btnGoing.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+                                btnGoing.setText("Added!");
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                        }
+                    });
+                });
+            }
+
+            feed.addView(concertView);
+        }
+    }
+
+    public static void FillProfileConcertsForFragment(AppCompatActivity activity, List<Concert> concerts, LinearLayout feed) {
+        if (feed == null) {
+            return;
+        }
+
+        feed.removeAllViews();
+
+        if (concerts == null || concerts.isEmpty()) {
+            return;
+        }
+
+        for (Concert concert : concerts) {
+            View concertView = activity.getLayoutInflater().inflate(R.layout.concert_item, feed, false);
+            ImageButton concertImage = concertView.findViewById(R.id.concert);
+            Glide.with(activity)
+                    .load(concert.getImageUrl())
+                    .into(concertImage);
+            TextView artist = concertView.findViewById(R.id.artist);
+            TextView location = concertView.findViewById(R.id.location);
+            TextView date = concertView.findViewById(R.id.date);
+
+            artist.setText(concert.getArtistName());
+            location.setText(concert.getLocation());
+            date.setText(concert.getFormattedDate());
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
+            params.setMargins(0, 40, 0, 40);
+            concertView.setLayoutParams(params);
+
+            feed.addView(concertView);
+        }
+    }
+
+    public static void FillWishlistConcertsForFragment(AppCompatActivity activity, List<Concert> concerts, LinearLayout feed) {
+        if (feed == null) {
+            return;
+        }
+
+        feed.removeAllViews();
+
+        if (concerts == null || concerts.isEmpty()) {
+            return;
+        }
+
+        for (Concert concert : concerts) {
+            View concertView = activity.getLayoutInflater().inflate(R.layout.concert_item_profile, feed, false);
+            ImageButton concertImage = concertView.findViewById(R.id.concert);
+            Glide.with(activity)
+                    .load(concert.getImageUrl())
+                    .into(concertImage);
+            TextView artist = concertView.findViewById(R.id.artist);
+            TextView location = concertView.findViewById(R.id.location);
+            TextView date = concertView.findViewById(R.id.date);
+
+            artist.setText(concert.getArtistName());
+            location.setText(concert.getLocation());
+            date.setText(concert.getFormattedDate());
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
+            params.setMargins(0, 40, 0, 40);
+            concertView.setLayoutParams(params);
+
+            Button btnGoing = concertView.findViewById(R.id.btn_im_going);
+            Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
+            if (btnGoing != null && btnWantToGo != null) {
+                btnWantToGo.setVisibility(View.GONE);
+                btnGoing.setText("I'm going!");
+                btnGoing.setOnClickListener(v -> {
+                    btnGoing.setEnabled(false);
+                    Toast.makeText(activity, "Moving to attending!", Toast.LENGTH_SHORT).show();
+                    
+                    if (activity instanceof Profile) {
+                        Profile profile = (Profile) activity;
+                        String accessToken = profile.getIntent().getStringExtra("accessToken");
+                        long userId = profile.getIntent().getLongExtra("userId", 0L);
+                        
+                        if (accessToken == null || userId == 0) {
+                            return;
+                        }
+                        
+                        APIService apiService = APIClient.getClient().create(APIService.class);
+                        apiService.moveFromWishlistToAttending("Bearer " + accessToken, userId, (long) concert.getId()).enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    btnGoing.setBackgroundTintList(ColorStateList.valueOf(Color.GREEN));
+                                    btnGoing.setText("Added!");
+                                }
+                            }
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                            }
+                        });
+                    }
+                });
+            }
+
+            feed.addView(concertView);
+        }
+    }
+
+    public static void FillAttendingConcertsForFragment(AppCompatActivity activity, List<Concert> concerts, LinearLayout feed) {
+        if (feed == null) {
+            return;
+        }
+
+        feed.removeAllViews();
+
+        if (concerts == null || concerts.isEmpty()) {
+            return;
+        }
+
+        for (Concert concert : concerts) {
+            View concertView = activity.getLayoutInflater().inflate(R.layout.concert_item_profile, feed, false);
+            ImageButton concertImage = concertView.findViewById(R.id.concert);
+            Glide.with(activity)
+                    .load(concert.getImageUrl())
+                    .into(concertImage);
+            TextView artist = concertView.findViewById(R.id.artist);
+            TextView location = concertView.findViewById(R.id.location);
+            TextView date = concertView.findViewById(R.id.date);
+
+            artist.setText(concert.getArtistName());
+            location.setText(concert.getLocation());
+            date.setText(concert.getFormattedDate());
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) concertView.getLayoutParams();
+            params.setMargins(0, 40, 0, 40);
+            concertView.setLayoutParams(params);
+
+            Button btnGoing = concertView.findViewById(R.id.btn_im_going);
+            Button btnWantToGo = concertView.findViewById(R.id.btn_want_to_go);
+            if (btnGoing != null && btnWantToGo != null) {
+                btnGoing.setVisibility(View.GONE);
+                btnWantToGo.setVisibility(View.GONE);
+            }
+
+            feed.addView(concertView);
+        }
+    }
+
+    public static List<Concert> convertConcertDTOsToConcerts(List<ConcertDTO> concertDTOs) {
+        List<Concert> concerts = new ArrayList<>();
+        for (ConcertDTO dto : concertDTOs) {
+            Concert concert = new Concert(
+                dto.getId().intValue(),
+                dto.getArtistId().intValue(),
+                dto.getArtistName(),
+                dto.getImageUrl(),
+                dto.getLocation(),
+                dto.getDate(),
+                dto.isAttending(),
+                dto.isWishlisted()
+            );
+            concerts.add(concert);
+        }
+        return concerts;
     }
 }

@@ -11,11 +11,12 @@ public class Concert {
     private String location;
     private String date;
     private boolean attending;
+    private boolean wishlisted;
 
     public Concert() {
     }
 
-    public Concert(int id, int artistId, String artistName, String imageUrl, String location, String date, boolean attending) {
+    public Concert(int id, int artistId, String artistName, String imageUrl, String location, String date, boolean attending, boolean wishlisted) {
         this.id = id;
         this.artistId = artistId;
         this.artistName = artistName;
@@ -23,6 +24,7 @@ public class Concert {
         this.location = location;
         this.date = date;
         this.attending = attending;
+        this.wishlisted = wishlisted;
     }
 
     public int getId() {
@@ -94,5 +96,13 @@ public class Concert {
 
     public void setAttending(boolean attending) {
         this.attending = attending;
+    }
+
+    public boolean isWishlisted() {
+        return wishlisted;
+    }
+
+    public void setWishlisted(boolean wishlisted) {
+        this.wishlisted = wishlisted;
     }
 }

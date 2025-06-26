@@ -13,6 +13,8 @@ public class ConcertDTO {
     private String imageUrl;
     private String location;
     private String date;
+    private boolean attending;
+    private boolean wishlisted;
 
     @Override
     public String toString() {
